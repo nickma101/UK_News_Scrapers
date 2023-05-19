@@ -1,14 +1,12 @@
-
+from  credentials.creds import Guardian_api_key
 import requests
 import json
 from datetime import datetime, timedelta
 
-
-api_key = "4ed35a9f-ee74-47db-8cc6-0aac0a181417"
+api_key = Guardian_api_key
 base_url = "https://content.guardianapis.com/search"
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
-
 
 query_params = {
     "api-key": api_key,
@@ -24,7 +22,7 @@ query_params = {
 response = requests.get(base_url, params=query_params)
 
 response_json = json.loads(response.text)
-
+print(response.json)
 
 def create_article(
     url,
