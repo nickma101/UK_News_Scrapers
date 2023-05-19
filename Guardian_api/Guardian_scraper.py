@@ -93,4 +93,4 @@ for article in response_json["response"]["results"]:
     else:
         print(article['webUrl'])
 
-print(len(documentCollection))
+print(documentCollection)
