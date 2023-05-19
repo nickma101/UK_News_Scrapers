@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from  credentials.creds import Guardian_api_key
 import requests
 import json
@@ -91,9 +92,12 @@ for article in response_json["response"]["results"]:
     else:
         print(article['webUrl'])
 
-dateString = str(date)
-filename = "articles" + dateString +".json"
-print(filename)
+#print(documentCollection)
 
-with open(filename, 'w') as outfile:
-    outfile.write(socumentColletion)
+dateString = str(date)[:10]
+filename = "articles"+dateString+".json"
+
+with open(filename, "w") as file:
+   json.dump(documentCollection, file, default=str)
+
+
