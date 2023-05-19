@@ -91,4 +91,9 @@ for article in response_json["response"]["results"]:
     else:
         print(article['webUrl'])
 
-print(documentCollection)
+dateString = str(date)
+filename = "articles" + dateString +".json"
+print(filename)
+
+with open(filename, 'w') as outfile:
+    outfile.write(socumentColletion)
