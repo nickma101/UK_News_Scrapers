@@ -1,13 +1,55 @@
 from bs4 import BeautifulSoup
 import feedparser
 import requests
-from .utils.utils import create_article
+# from .utils.utils import create_article
+from bson.objectid import ObjectId
+from datetime import datetime
+import json
+
+
+def create_article(
+        *,
+        url,
+        primary_category,
+        sub_categories=[],
+        title,
+        lead,
+        author=None,
+        date_published,
+        date_updated=None,
+        language,
+        outlet,
+        image=None,
+        body,
+):
+    return {
+        "_id": generate_id(),  # Generate custom ID because the backend uses strings instead of ObjectId()s
+        "url": url,
+        "primaryCategory": primary_category,
+        "subCategories": sub_categories,
+        "title": title,
+        "lead": lead,
+        "author": author,
+        "datePublished": date_published,
+        "dateScraped": datetime.now(),
+        "dateUpdated": date_updated,
+        "language": language,
+        "outlet": outlet,
+        "image": image,
+        "body": body,
+    }
+
+
+def generate_id():
+    return str(ObjectId())
+
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
 NEWS_FEED = "https://www.independent.co.uk/news/uk/rss"
 NEWS_LANGUAGE = "en-UK"
 
+date = datetime.utcnow()
 
 # Read the RSS feed and retrieve URL and article metadata
 def get_rss_feed():
@@ -43,7 +85,7 @@ def scrape_article(article):
     document = create_article(
         url=article['url'],
         primary_category=article['primaryCategory'][0]['term'],
-        sub_categories=sub_categories,
+        sub_categories="test",
         title=article['title'],
         lead=article['lead'],
         author=article['author'],
@@ -60,8 +102,8 @@ def scrape_article(article):
 
 # The scraper will retrieve news article URLs from the RSS feed and parse the HTML documents
 def scrape():
-    rss_results = get_rss_feed() # Get partial article information from RSS feeds
-    newsarticles_collection = [] # Collection to store complete articles
+    rss_results = get_rss_feed()  # Get partial article information from RSS feeds
+    newsarticles_collection = []  # Collection to store complete articles
 
     for article in rss_results:
         try:
@@ -69,8 +111,16 @@ def scrape():
 
             if new_article:
                 newsarticles_collection.append(new_article)
+                print(new_article['url'])
         except Exception as e:
             print(f"Couldn't scrape article: {article['url']}")
             print(e)
+    dateString = str(date)[:10]
+    filename = "articles" + dateString + ".json"
+
+    with open(filename, "w") as file:
+        json.dump(newsarticles_collection, file, default=str)
 
     return newsarticles_collection
+
+scrape()
