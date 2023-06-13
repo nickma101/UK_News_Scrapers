@@ -1,13 +1,16 @@
 from bs4 import BeautifulSoup
 import feedparser
 import requests
-from .utils.utils import create_article
+from utils.utils import create_article
+from datetime import  datetime
+import json
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "BBC"
 NEWS_FEED = "http://feeds.bbci.co.uk/news/rss.xml"
 NEWS_LANGUAGE = "en-UK"
 
+date = datetime.utcnow()
 
 # Read the RSS feed and retrieve URL and article metadata
 def get_rss_feed():
@@ -60,7 +63,7 @@ def scrape_article(article):
         body=body
     )
 
-    print(document)
+    return document
 
 
 # The scraper will retrieve news article URLs from the RSS feed and parse the HTML documents
@@ -78,4 +81,11 @@ def scrape():
             print(f"Couldn't scrape article: {article['url']}")
             print(e)
 
+    dateString = str(date)[:10]
+    filename = "bbc_articles" + dateString + ".json"
+
+    with open(filename, "w") as file:
+        json.dump(newsarticles_collection, file, default=str)
     return newsarticles_collection
+
+scrape()

@@ -95,7 +95,7 @@ for article in response_json["response"]["results"]:
 #print(documentCollection)
 
 dateString = str(date)[:10]
-filename = "articles"+dateString+".json"
+filename = "guardian_articles"+dateString+".json"
 
 with open(filename, "w") as file:
    json.dump(documentCollection, file, default=str)
