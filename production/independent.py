@@ -1,47 +1,7 @@
 from bs4 import BeautifulSoup
-import feedparser
-import requests
-# from .utils.utils import create_article
-from bson.objectid import ObjectId
+import feedparser, requests, json, os
+from utils.utils import create_article
 from datetime import datetime
-import json
-
-
-def create_article(
-        *,
-        url,
-        primary_category,
-        sub_categories=[],
-        title,
-        lead,
-        author=None,
-        date_published,
-        date_updated=None,
-        language,
-        outlet,
-        image=None,
-        body,
-):
-    return {
-        "_id": generate_id(),  # Generate custom ID because the backend uses strings instead of ObjectId()s
-        "url": url,
-        "primaryCategory": primary_category,
-        "subCategories": sub_categories,
-        "title": title,
-        "lead": lead,
-        "author": author,
-        "datePublished": date_published,
-        "dateScraped": datetime.now(),
-        "dateUpdated": date_updated,
-        "language": language,
-        "outlet": outlet,
-        "image": image,
-        "body": body,
-    }
-
-
-def generate_id():
-    return str(ObjectId())
 
 
 # Define the default name and feed of the news outlet
@@ -116,8 +76,10 @@ def scrape():
             print(e)
     dateString = str(date)[:10]
     filename = "independent_articles" + dateString + ".json"
+    desired_dir = "data"
+    full_path = os.path.join(desired_dir, filename)
 
-    with open(filename, "w") as file:
+    with open(full_path, "w") as file:
         json.dump(newsarticles_collection, file, default=str)
 
     return newsarticles_collection

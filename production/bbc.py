@@ -1,9 +1,7 @@
 from bs4 import BeautifulSoup
-import feedparser
-import requests
+import feedparser, requests, json, os
 from utils.utils import create_article
 from datetime import  datetime
-import json
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "BBC"
@@ -83,8 +81,10 @@ def scrape():
 
     dateString = str(date)[:10]
     filename = "bbc_articles" + dateString + ".json"
+    desired_dir = "data"
+    full_path = os.path.join(desired_dir, filename)
 
-    with open(filename, "w") as file:
+    with open(full_path, "w") as file:
         json.dump(newsarticles_collection, file, default=str)
     return newsarticles_collection
 

@@ -1,7 +1,6 @@
 #!/usr/bin/python
 from  credentials.creds import Guardian_api_key
-import requests
-import json
+import requests, json, os
 from datetime import datetime, timedelta
 
 api_key = Guardian_api_key
@@ -96,8 +95,10 @@ for article in response_json["response"]["results"]:
 
 dateString = str(date)[:10]
 filename = "guardian_articles"+dateString+".json"
+desired_dir = "data"
+full_path = os.path.join(desired_dir, filename)
 
-with open(filename, "w") as file:
+with open(full_path, "w") as file:
    json.dump(documentCollection, file, default=str)
 
 
