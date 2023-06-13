@@ -1,7 +1,8 @@
 #!/usr/bin/python
-from  credentials.creds import Guardian_api_key
+from credentials.creds import Guardian_api_key
 import requests, json, os
 from datetime import datetime, timedelta
+from utils.utils import create_article
 
 api_key = Guardian_api_key
 base_url = "https://content.guardianapis.com/search"
@@ -22,38 +23,6 @@ query_params = {
 response = requests.get(base_url, params=query_params)
 
 response_json = json.loads(response.text)
-print(response.json)
-
-def create_article(
-    url,
-    primary_category,
-    #sub_categories = [],
-    title,
-    lead,
-    author,
-    date_published,
-    #date_updated = None,
-    language,
-    outlet,
-    image,
-    body,
-):
-
-    return {
-        "url": url,
-        "primaryCategory": primary_category,
-        #"subCategories": sub_categories,
-        "title": title,
-        "lead": lead,
-        "author": author,
-        "datePublished": date_published,
-        "dateScraped": datetime.now(),
-        #"dateUpdated": date_updated,
-        "language": language,
-        "outlet": outlet,
-        "image": image,
-        "body": body,
-    }
 
 
 NEWS_LANGUAGE = 'en-UK'

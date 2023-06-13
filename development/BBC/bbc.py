@@ -7,7 +7,7 @@ import json
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "BBC"
-NEWS_FEED = "http://feeds.bbci.co.uk/news/rss.xml"
+NEWS_FEED = "https://news.sky.com/rss.xml"
 NEWS_LANGUAGE = "en-UK"
 
 date = datetime.utcnow()
