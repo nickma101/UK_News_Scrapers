@@ -5,7 +5,7 @@ from datetime import  datetime
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "BBC"
-NEWS_FEEDS = ["http://feeds.bbci.co.uk/news/rss.xml", "http://feeds.bbci.co.uk/news/business/rss.xml", "http://feeds.bbci.co.uk/news/technology/rss.xml", "http://feeds.bbci.co.uk/news/politics/rss.xml", "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml"]
+NEWS_FEEDS = ["http://feeds.bbci.co.uk/news/rss.xml", "http://feeds.bbci.co.uk/news/world/rss.xml", "http://feeds.bbci.co.uk/news/business/rss.xml", "http://feeds.bbci.co.uk/news/technology/rss.xml", "http://feeds.bbci.co.uk/news/politics/rss.xml", "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml", "http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml", "http://feeds.bbci.co.uk/news/health/rss.xml"]
 NEWS_LANGUAGE = "en-UK"
 
 date = datetime.utcnow()

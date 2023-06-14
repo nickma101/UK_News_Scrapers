@@ -6,7 +6,7 @@ from datetime import datetime
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
-NEWS_FEEDS = ["https://www.independent.co.uk/news/uk/rss", "https://www.independent.co.uk/environment/rss", "https://www.independent.co.uk/sport/rss", "https://www.independent.co.uk/arts-entertainment/rss", "https://www.independent.co.uk/travel/rss"]
+NEWS_FEEDS = ["https://www.independent.co.uk/news/uk/rss", "https://www.independent.co.uk/climate-change/news/rss", "https://www.independent.co.uk/environment/rss", "https://www.independent.co.uk/sport/rss", "https://www.independent.co.uk/arts-entertainment/rss", "https://www.independent.co.uk/travel/rss", "https://www.independent.co.uk/life-style/rss"]
 NEWS_LANGUAGE = "en-UK"
 
 date = datetime.utcnow()
@@ -55,6 +55,7 @@ def scrape_article(article):
         image=article['image'][0]['url'],
         body=body
     )
+    print(document)
     return document
 
 
