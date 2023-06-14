@@ -1,11 +1,18 @@
 from bs4 import BeautifulSoup
-import feedparser, requests, json
+import feedparser, requests, json, os
 from utils.utils import create_article
-from datetime import  datetime
+from datetime import datetime
+from dateutil import parser
 
 # Define the default name and feed of the news outlet
-NEWS_OUTLET = "BBC"
-NEWS_FEEDS = ["https://feeds.skynews.com/feeds/rss/home.xml", "https://feeds.skynews.com/feeds/rss/uk.xml", "https://feeds.skynews.com/feeds/rss/world.xml", "https://feeds.skynews.com/feeds/rss/business.xml", "https://feeds.skynews.com/feeds/rss/politics.xml", "https://feeds.skynews.com/feeds/rss/technology.xml", "https://feeds.skynews.com/feeds/rss/entertainment.xml"]
+NEWS_OUTLET = "SkyNews"
+NEWS_FEEDS = [{'url': "https://feeds.skynews.com/feeds/rss/home.xml", 'category': "home"},
+              {'url': "https://feeds.skynews.com/feeds/rss/uk.xml", 'category': "uk"},
+              {'url':"https://feeds.skynews.com/feeds/rss/world.xml", 'category': "world"},
+              {'url':"https://feeds.skynews.com/feeds/rss/business.xml", 'category': "business"},
+              {'url':"https://feeds.skynews.com/feeds/rss/politics.xml", 'category': "politics"},
+              {'url':"https://feeds.skynews.com/feeds/rss/technology.xml", 'category': "technology"},
+              {'url':"https://feeds.skynews.com/feeds/rss/entertainment.xml", 'category': "entertainment"}]
 NEWS_LANGUAGE = "en-UK"
 
 date = datetime.utcnow()
@@ -21,46 +28,41 @@ def get_rss_feed(feed):
         article_props['url'] = rss_article.link
         article_props['title'] = rss_article.title
         article_props['lead'] = rss_article.summary
-        # article_props['author'] = rss_article.author
-        # article_props['primaryCategory'] = rss_article.tags
-        article_props['date_published'] = rss_article.published
-        #article_props['image'] = rss_article.media_content
+        article_props['image'] = rss_article.media_content[0].get('url')
 
         article_list.append(article_props)
 
     return article_list
 
 # Scrape individual articles and combine existing RSS meta-data with text from website
-def scrape_article(article):
+def scrape_article(article, category):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
 
     bodies = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
     body = '<br/>'.join([str(b.text) for b in bodies])
-    # categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
-    # primary_category = categories[0].text
-    # sub_categories = ','.join([str(c.text) for c in categories[1:]])
-    # images = soup.find_all('div', {'data-component': 'image-block'})
-    # image = soup.find('img').get("src")
-    author = soup.find('span', {'class': 'sdc-article-author'})
+    datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split('2023',1)[0]+'2023'
+    published = parser.parse(datestring)
 
-    date_updated = "test"
+    try:
+        author = soup.find('span', {'class': 'sdc-article-author__name'}).text
+    except:
+        author = "None"
 
     document = create_article(
         url=article['url'],
-        primary_category="test",
+        primary_category=category,
         sub_categories="test",
         title=article['title'],
         lead=article['lead'],
         author=author,
-        date_published="test",
-        date_updated=date_updated,
+        date_published=published,
+        date_updated="test",
         language=NEWS_LANGUAGE,
         outlet=NEWS_OUTLET,
-        image="test",
+        image=article['image'],
         body=body
     )
-    print(document)
     return document
 
 
@@ -68,12 +70,14 @@ def scrape_article(article):
 def scrape():
     newsarticles_collection = [] # Collection to store complete articles
 
-    for feed in NEWS_FEEDS:
+    for e in NEWS_FEEDS:
+        feed = e.get('url')
+        category = e.get('category')
         rss_results = get_rss_feed(feed)  # Get partial article information from RSS feeds
 
         for article in rss_results:
             try:
-                new_article = scrape_article(article)
+                new_article = scrape_article(article, category)
 
                 if new_article:
                     newsarticles_collection.append(new_article)
@@ -83,9 +87,12 @@ def scrape():
 
     dateString = str(date)[:10]
     filename = "sky_articles" + dateString + ".json"
+    desired_dir = "data"
+    full_path = os.path.join(desired_dir, filename)
 
-    with open(filename, "w") as file:
+    with open(full_path, "w") as file:
         json.dump(newsarticles_collection, file, default=str)
+
     return newsarticles_collection
 
 scrape()
