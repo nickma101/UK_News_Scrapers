@@ -55,7 +55,6 @@ def scrape_article(article):
         image=article['image'][0]['url'],
         body=body
     )
-    print(document)
     return document
 
 

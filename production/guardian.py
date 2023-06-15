@@ -60,8 +60,6 @@ for article in response_json["response"]["results"]:
     else:
         print(article['webUrl'])
 
-#print(documentCollection)
-
 dateString = str(date)[:10]
 filename = "guardian_articles"+dateString+".json"
 desired_dir = "data"

@@ -38,14 +38,18 @@ def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    bodies = soup.find_all('div', {'data-component': 'text-block'})
+    #bodies = soup.findAll('div', {'data-component': 'text-block'})
+    bodies = soup.findAll({'p': {'data-component': 'text-block'}})
     body = '<br/>'.join([str(b.text) for b in bodies])
     categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
     primary_category = categories[0].text
     sub_categories = ','.join([str(c.text) for c in categories[1:]])
     # images = soup.find_all('div', {'data-component': 'image-block'})
     image = soup.find('img').get("src")
-    author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text
+    try:
+        author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text
+    except:
+        author = "No author"
 
     date_updated = "test"
 
@@ -56,14 +60,13 @@ def scrape_article(article):
         title=article['title'],
         lead=article['lead'],
         author=author,
-        date_published="test",
+        date_published=article['date_published'],
         date_updated=date_updated,
         language=NEWS_LANGUAGE,
         outlet=NEWS_OUTLET,
         image=image,
         body=body
     )
-
     return document
 
 
