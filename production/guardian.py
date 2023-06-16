@@ -37,21 +37,23 @@ for article in response_json["response"]["results"]:
     if (article['sectionId'] not in blacklist) and ('corrections-and-clarifications' not in article['webUrl']) :
 
         try:
+            datestring = article['webPublicationDate']
+            datetime_obj = datetime.strptime(datestring, "%Y-%m-%dT%H:%M:%SZ")
+            published = datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
             document = create_article(
                     url=article['webUrl'],
                     primary_category=article['sectionId'],
-                    #sub_categories=sub_categories,
+                    sub_categories="test",
                     title=article['webTitle'],
                     lead=article['fields']['trailText'],
                     author=article['fields']['byline'],
-                    date_published=article['webPublicationDate'],
-                    #date_updated=modify_date,
+                    date_published=published,
+                    date_updated="test",
                     language=NEWS_LANGUAGE,
                     outlet=NEWS_OUTLET,
                     image=article['fields']['thumbnail'],
                     body=article['fields']['bodyText']
                 )
-
             documentCollection.append(document)
 
         except:

@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import feedparser, requests, json, os
 from utils.utils import create_article
-from datetime import  datetime
+from datetime import datetime
+from dateutil import parser
+
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "BBC"
@@ -24,11 +26,9 @@ def get_rss_feed(feed):
             article_props['lead'] = rss_article.summary
         except:
             article_props['lead'] = "Click here to read more"
-        #article_props['author'] = rss_article.author
-        #article_props['primaryCategory'] = rss_article.tags
-        article_props['date_published'] = rss_article.published
-        #article_props['image'] = rss_article.media_content
-
+        datestring = rss_article.published.split(" GMT")[0]
+        published = parser.parse(datestring)
+        article_props['date_published'] = published
         article_list.append(article_props)
 
     return article_list
@@ -38,13 +38,11 @@ def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    #bodies = soup.findAll('div', {'data-component': 'text-block'})
     bodies = soup.findAll({'p': {'data-component': 'text-block'}})
     body = '<br/>'.join([str(b.text) for b in bodies])
     categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
     primary_category = categories[0].text
     sub_categories = ','.join([str(c.text) for c in categories[1:]])
-    # images = soup.find_all('div', {'data-component': 'image-block'})
     image = soup.find('img').get("src")
     try:
         author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text

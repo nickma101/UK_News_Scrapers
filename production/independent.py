@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup
 import feedparser, requests, json, os
 from utils.utils import create_article
 from datetime import datetime
+from dateutil import parser
+
 
 
 # Define the default name and feed of the news outlet
@@ -25,8 +27,13 @@ def get_rss_feed(feed):
         article_props['lead'] = rss_article.description
         article_props['author'] = rss_article.author
         article_props['primaryCategory'] = rss_article.tags
-        article_props['date_published'] = rss_article.published
-        article_props['image'] = rss_article.media_content
+        datestring = rss_article.published.split(" GMT")[0]
+        published = parser.parse(datestring)
+        article_props['date_published'] = published
+        try:
+            article_props['image'] = rss_article.media_content
+        except:
+            article_props['image'] = "None"
         article_props['date_updated'] = rss_article.updated
 
         article_list.append(article_props)

@@ -41,8 +41,9 @@ def scrape_article(article, category):
 
     bodies = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
     body = '<br/>'.join([str(b.text) for b in bodies])
-    datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split('2023',1)[0]+'2023'
+    datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split(',',1)[0]
     published = parser.parse(datestring)
+
 
     try:
         author = soup.find('span', {'class': 'sdc-article-author__name'}).text
