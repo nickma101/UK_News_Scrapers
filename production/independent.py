@@ -26,7 +26,10 @@ def get_rss_feed(feed):
         article_props['title'] = rss_article.title
         article_props['lead'] = rss_article.description
         article_props['author'] = rss_article.author
-        article_props['primaryCategory'] = rss_article.tags
+        try:
+            article_props['primaryCategory'] = rss_article.tags
+        except:
+            article_props['primaryCategory'] = "None"
         datestring = rss_article.published.split(" GMT")[0]
         published = parser.parse(datestring)
         article_props['date_published'] = published
