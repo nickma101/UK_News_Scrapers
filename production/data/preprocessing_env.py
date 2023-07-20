@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import csv
 
 # what to include / exclude
 topics = ["business", "crime", "entertainment", "football", "health", "lifestyle", "politics", "science", "sport",
@@ -22,7 +23,7 @@ def get_data():
                 data = open(file)
                 articles = json.load(data)
             except:
-                print('no articles today it seems')
+                break
             # standardise topics
             for article in articles:
                 # business
@@ -98,8 +99,13 @@ def get_articles():
     for d in data:
         if d.get('primaryCategory') == "environment":
             articles.append(d)
-    # filtering out short texts
-    print(articles)
+    #save data
+    with open('environment.csv', 'w', encoding='utf8', newline='') as output_file:
+        fc = csv.DictWriter(output_file,
+                            fieldnames=articles[0].keys(),
+                            )
+        fc.writeheader()
+        fc.writerows(articles)
     return articles
 
 
