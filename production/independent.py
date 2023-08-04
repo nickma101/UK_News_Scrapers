@@ -5,7 +5,6 @@ from datetime import datetime
 from dateutil import parser
 
 
-
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
 NEWS_FEEDS = ["https://www.independent.co.uk/news/uk/rss", "https://www.independent.co.uk/climate-change/news/rss", "https://www.independent.co.uk/environment/rss", "https://www.independent.co.uk/sport/rss", "https://www.independent.co.uk/arts-entertainment/rss", "https://www.independent.co.uk/travel/rss", "https://www.independent.co.uk/life-style/rss"]
@@ -49,7 +48,22 @@ def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    body = soup.find('div', {'id': 'main'}).text
+    divs = soup.find('div', {'id': 'main'})
+    all_paragraphs = []
+    for div in divs:
+        paragraphs = div.find_all('p')
+        all_paragraphs.extend(paragraphs)
+    filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
+    body = []
+    for p in filtered_paragraphs:
+        if "Read more:" not in p.text:
+            if p.find('strong'):
+                body.append({"type": "headline", "text": str(p.text)})
+            else:
+                body.append({"type": "text", "text": str(p.text)})
+    print(article['url'])
+    print(body)
+    # body = soup.find('div', {'id': 'main'}).text
 
     document = create_article(
         url=article['url'],

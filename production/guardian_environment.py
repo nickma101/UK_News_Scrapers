@@ -3,6 +3,7 @@ from credentials.creds import Guardian_api_key
 import requests, json, os
 from datetime import datetime, timedelta
 from utils.utils import create_article
+from bs4 import BeautifulSoup
 
 api_key = Guardian_api_key
 base_url = "https://content.guardianapis.com/search"
@@ -40,6 +41,19 @@ for article in response_json["response"]["results"]:
             datestring = article['webPublicationDate']
             datetime_obj = datetime.strptime(datestring, "%Y-%m-%dT%H:%M:%SZ")
             published = datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
+            soup = BeautifulSoup(article['fields']['body'], 'html.parser')
+            all_paragraphs = []
+            for e in soup.find_all('p'):
+                all_paragraphs.append(e)
+            filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
+            body = []
+            for p in filtered_paragraphs:
+                if "Read more:" not in p.text:
+                    if "Read more:" not in p.text:
+                        if p.find('strong'):
+                            body.append({"type": "headline", "text": str(p.text)})
+                        else:
+                            body.append({"type": "text", "text": str(p.text)})
             document = create_article(
                     url=article['webUrl'],
                     primary_category=article['sectionId'],
@@ -52,7 +66,7 @@ for article in response_json["response"]["results"]:
                     language=NEWS_LANGUAGE,
                     outlet=NEWS_OUTLET,
                     image=article['fields']['thumbnail'],
-                    body=article['fields']['bodyText']
+                    body=body
                 )
             documentCollection.append(document)
 

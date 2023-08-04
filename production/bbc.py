@@ -37,9 +37,16 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
-
-    bodies = soup.findAll({'p': {'data-component': 'text-block'}})
-    body = '<br/>'.join([str(b.text) for b in bodies])
+    # bodies = soup.findAll({'p': {'data-component': 'text-block'}})
+    filtered_paragraphs = [p for p in soup.findAll({'p': {'data-component': 'text-block'}})]
+    body = []
+    for p in filtered_paragraphs:
+        if "Watch:" not in p.text and "This video can not be played" not in p.text:
+            if p.find('b'):
+                body.append({"type": "headline", "text": str(p.text)})
+            else:
+                body.append({"type": "text", "text": str(p.text)})
+    # body = '<br/>'.join([str(b.text) for b in bodies])
     categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
     try:
         related_categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-w6az1r-StyledLink ed0g1kj0'})]
@@ -49,37 +56,39 @@ def scrape_article(article):
         primary_category = 'environment'
     else:
        primary_category = categories[0].text
-    sub_categories = ','.join([str(c.text) for c in categories[1:]])
+    try:
+        sub_categories = ','.join([str(c.text) for c in categories[1:]])
+    except: sub_categories = "None"
     image = soup.find('img').get("src")
     try:
         author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text
     except:
         author = "No author"
 
-    date_updated = "test"
+    # date_updated = "None"
 
     document = create_article(
-        url=article['url'],
-        primary_category=primary_category,
-        sub_categories=sub_categories,
-        title=article['title'],
-        lead=article['lead'],
-        author=author,
-        date_published=article['date_published'],
-        date_updated=date_updated,
-        language=NEWS_LANGUAGE,
-        outlet=NEWS_OUTLET,
-        image=image,
-        body=body
+        url=article['url'],                             # string
+        primary_category=primary_category,              # string
+        sub_categories=sub_categories,                  # list of strings
+        title=article['title'],                         # string
+        lead=article['lead'],                           # string
+        author=author,                                  # string
+        date_published=article['date_published'],       # datetime
+        date_updated=article['date_published'],         # datetime - NEEDS WORK (currently same as date published)
+        language=NEWS_LANGUAGE,                         # string
+        outlet=NEWS_OUTLET,                             # string
+        image=image,                                    # string
+        body=body                                       # list of dictionaries
     )
     return document
 
 
 # The scraper will retrieve news article URLs from the RSS feed and parse the HTML documents
 def scrape():
-    newsarticles_collection = [] # Collection to store complete articles
+    newsarticles_collection = []            # Collection to store complete articles
     for feed in NEWS_FEEDS:
-        rss_results = get_rss_feed(feed) # Get partial article information from RSS feeds
+        rss_results = get_rss_feed(feed)    # Get partial article information from RSS feeds
         for article in rss_results:
             try:
                 new_article = scrape_article(article)

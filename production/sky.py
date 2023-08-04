@@ -38,9 +38,19 @@ def get_rss_feed(feed):
 def scrape_article(article, category):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
-
-    bodies = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
-    body = '<br/>'.join([str(b.text) for b in bodies])
+    divs = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
+    all_paragraphs = []
+    for div in divs:
+        paragraphs = div.find_all('p')
+        all_paragraphs.extend(paragraphs)
+    filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
+    body = []
+    for p in filtered_paragraphs:
+        if "Read more:" not in p.text:
+            if p.find('strong'):
+                body.append({"type": "headline", "text": str(p.text)})
+            else:
+                body.append({"type": "text", "text": str(p.text)})
     datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split(',',1)[0]
     published = parser.parse(datestring)
 
@@ -52,17 +62,17 @@ def scrape_article(article, category):
 
     document = create_article(
         url=article['url'],
-        primary_category=category,
-        sub_categories="test",
-        title=article['title'],
-        lead=article['lead'],
-        author=author,
-        date_published=published,
-        date_updated="test",
-        language=NEWS_LANGUAGE,
-        outlet=NEWS_OUTLET,
-        image=article['image'],
-        body=body
+        primary_category=category,  # string
+        sub_categories="None",      # string
+        title=article['title'],     # string
+        lead=article['lead'],       # string
+        author=author,              # string
+        date_published=published,   # datetime
+        date_updated=published,     # datetime - NEEDS WORK
+        language=NEWS_LANGUAGE,     # string
+        outlet=NEWS_OUTLET,         # string
+        image=article['image'],     # image
+        body=body                   # list of dictionaries
     )
     return document
 
