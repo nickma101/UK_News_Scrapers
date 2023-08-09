@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import feedparser, requests, json, os
+import feedparser, requests, json, os, re
 from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
@@ -18,12 +18,11 @@ def get_rss_feed(feed):
     newsFeed = feedparser.parse(feed)
 
     for rss_article in newsFeed.entries:
-        #print(rss_article)
         # Collection to hold the article specific metadata
         article_props = {}
         article_props['url'] = rss_article.link
         article_props['title'] = rss_article.title
-        article_props['lead'] = rss_article.description
+        article_props['lead'] = re.sub(r'<.*?>', '', rss_article.description)
         article_props['author'] = rss_article.author
         try:
             article_props['primaryCategory'] = rss_article.tags
@@ -36,7 +35,10 @@ def get_rss_feed(feed):
             article_props['image'] = rss_article.media_content
         except:
             article_props['image'] = "None"
-        article_props['date_updated'] = rss_article.updated
+        input_datetime = rss_article.updated
+        parsed_datetime = datetime.strptime(input_datetime, "%Y-%m-%dT%H:%M:%S+00:00")
+        formatted_datetime = parsed_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
+        article_props['date_updated'] = formatted_datetime
 
         article_list.append(article_props)
 
@@ -47,15 +49,13 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
-
-    divs = soup.find('div', {'id': 'main'})
-    print('111111111111111', divs)
+    divs = soup.find('div', {'class': 'sc-cvxyxr-2 frrzmY main-wrapper'})
+    # print('111111111111111', divs)
     all_paragraphs = []
     for div in divs:
         paragraphs = div.find_all('p')
         all_paragraphs.extend(paragraphs)
     filtered_paragraphs = [p for p in all_paragraphs]
-    print('222222', filtered_paragraphs)
     body = []
     for p in filtered_paragraphs:
         if "Read more:" not in p.text:
@@ -63,23 +63,20 @@ def scrape_article(article):
                 body.append({"type": "headline", "text": str(p.text)})
             else:
                 body.append({"type": "text", "text": str(p.text)})
-    print(article['url'])
-    print(body)
-    # body = soup.find('div', {'id': 'main'}).text
 
     document = create_article(
-        url=article['url'],
-        primary_category=article['primaryCategory'][0]['term'],
-        sub_categories="test",
-        title=article['title'],
-        lead=article['lead'],
-        author=article['author'],
-        date_published=article['date_published'],
-        date_updated=article['date_updated'],
-        language=NEWS_LANGUAGE,
-        outlet=NEWS_OUTLET,
-        image=article['image'][0]['url'],
-        body=body
+        url=article['url'],                                         # string
+        primary_category=article['primaryCategory'][0]['term'],     # string
+        sub_categories="None",                                      # string
+        title=article['title'],                                     # string
+        lead=article['lead'],                                       # string
+        author=article['author'],                                   # string
+        date_published=article['date_published'],                   # datetime
+        date_updated=article['date_updated'],                       # datetime
+        language=NEWS_LANGUAGE,                                     # string
+        outlet=NEWS_OUTLET,                                         # string
+        image=article['image'][0]['url'],                           # string
+        body=body                                                   # list of dictionaries
     )
     return document
 
