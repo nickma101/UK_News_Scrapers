@@ -5,6 +5,7 @@ from datetime import datetime
 from dateutil import parser
 import re
 
+
 def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
@@ -16,6 +17,7 @@ NEWS_FEEDS = ["https://www.standard.co.uk/rss"]
 NEWS_LANGUAGE = "en-UK"
 
 date = datetime.utcnow()
+
 
 # Read the RSS feed and retrieve URL and article metadata
 def get_rss_feed(feed):
@@ -51,22 +53,37 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
+    divs = soup.find('div', {'class': 'sc-evdWiO iHBFwX'})
+    paragraphs = []
+    first_letter = divs.find('span').text
 
-    body = soup.find('div', {'id': 'main'}).text
+    for div in divs:
+        block = div.find_all('p')
+        paragraphs.extend(block)
+    body = []
+    first_paragraph = paragraphs[0]
+    body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
+    other_paragraphs = paragraphs[1:]
+    for p in other_paragraphs:
+        if "Read more:" not in p.text:
+            if p.find('strong'):
+                body.append({"type": "headline", "text": str(p.text)})
+            else:
+                body.append({"type": "text", "text": str(p.text)})
 
     document = create_article(
-        url=article['url'],
-        primary_category=article['primaryCategory'][0]['term'],
-        sub_categories="test",
-        title=article['title'],
-        lead=remove_html_tags(article['lead']),
-        author=article['author'],
-        date_published=article['date_published'],
-        date_updated=article['date_updated'],
-        language=NEWS_LANGUAGE,
-        outlet=NEWS_OUTLET,
-        image=article['image'][0]['url'],
-        body=body
+        url=article['url'],                                         # string
+        primary_category=article['primaryCategory'][0]['term'],     # string
+        sub_categories="None",                                      # string
+        title=article['title'],                                     # string
+        lead=remove_html_tags(article['lead']),                     # string
+        author=article['author'],                                   # string
+        date_published=article['date_published'],                   # datetime
+        date_updated=article['date_updated'],                       # datetime
+        language=NEWS_LANGUAGE,                                     # string
+        outlet=NEWS_OUTLET,                                         # string
+        image=article['image'][0]['url'],                           # string
+        body=body                                                   # list of dictionaries
     )
     return document
 
@@ -94,5 +111,6 @@ def scrape():
         json.dump(newsarticles_collection, file, default=str)
 
     return newsarticles_collection
+
 
 scrape()

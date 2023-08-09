@@ -50,7 +50,6 @@ def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
     divs = soup.find('div', {'class': 'sc-cvxyxr-2 frrzmY main-wrapper'})
-    # print('111111111111111', divs)
     all_paragraphs = []
     for div in divs:
         paragraphs = div.find_all('p')
