@@ -1,8 +1,7 @@
 from bs4 import BeautifulSoup
-import requests
+import requests, json, re, os
 from utils.utils import create_article
 from datetime import datetime, timedelta
-import re
 
 NEWS_OUTLET = "INews"
 NEWS_FEEDS = ["https://inews.co.uk/category/news/environment"]
@@ -24,28 +23,43 @@ def scrape_sitemap(url):
 def scrape_article(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
-    title = soup.find('h1', {'class': 'headline'})
-    lead = soup.find('h1', {'class': ' excerpt'})
-    author = soup.find('div', {'class': 'author'})
+    title = soup.find('h1', {'class': 'headline'}).get_text()
+    lead = soup.find('h2').get_text()
+    authorbox = soup.find('div', {'class': 'inews__post-byline__author-link'})
+    author = authorbox.find('a').get_text()
     image = soup.find('img', {'class': 'w-100'})
-    all_sorta_stuff = soup.find('div', {'class': 'article-content'})
-    body = soup.find_all('p', all_sorta_stuff)
-    published = soup.find('span', {'class': 'inews__post__pubdate'})
-    updated = soup.find('span', {'class': 'inews__post__moddate'})
+    content = soup.find('div', {'class': 'article-content'})
+    paragraphs = soup.find_all('p', content)
+    for p in paragraphs:
+        for a_tag in p.find_all('a'):
+            a_tag.extract()
+    body = []
+    for p in paragraphs:
+        if p.find('strong'):
+            body.append({"type": "headline", "text": str(p.text)})
+        else:
+            body.append({"type": "text", "text": str(p.text)})
+    date_string = soup.find('span', {'class': 'inews__post__pubdate'}).get_text()
+    date_format = "%B %d, %Y %I:%M %p"
+    published = datetime.strptime(date_string, date_format)
+    try:
+        updated = soup.find('span', {'class': 'inews__post__moddate'}).get_text()
+    except:
+        updated = 'None'
 
     document = create_article(
-        url=url,
-        primary_category="environment",
-        sub_categories="test",
-        title=title,
-        lead=lead,
-        author=author,
-        date_published=published,
-        date_updated=updated,
-        language=NEWS_LANGUAGE,
-        outlet=NEWS_OUTLET,
-        image=image['src'],
-        body=body
+        url=url,                                # string
+        primary_category="environment",         # string
+        sub_categories="None",                  # string
+        title=title,                            # string
+        lead=lead,                              # string
+        author=author,                          # string
+        date_published=published,               # datetime
+        date_updated=updated,                   # string            # NEEDS WORK BUT NECESSARY?
+        language=NEWS_LANGUAGE,                 # string
+        outlet=NEWS_OUTLET,                     # string
+        image=image['src'],                     # string
+        body=body                               # list of dictionaries
     )
     return document
 
@@ -57,6 +71,14 @@ def scrape_articles():
         url = url.replace('"', '')
         article = scrape_article(url)
         articles.append(article)
+    dateString = str(date)[:10]
+    filename = "inews" + dateString + ".json"
+    desired_dir = "data"
+    full_path = os.path.join(desired_dir, filename)
+
+    with open(full_path, "w") as file:
+        json.dump(articles, file, default=str)
+
     return articles
 
 

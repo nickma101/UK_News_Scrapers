@@ -49,11 +49,13 @@ def scrape_article(article):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     divs = soup.find('div', {'id': 'main'})
+    print('111111111111111', divs)
     all_paragraphs = []
     for div in divs:
         paragraphs = div.find_all('p')
         all_paragraphs.extend(paragraphs)
-    filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
+    filtered_paragraphs = [p for p in all_paragraphs]
+    print('222222', filtered_paragraphs)
     body = []
     for p in filtered_paragraphs:
         if "Read more:" not in p.text:
