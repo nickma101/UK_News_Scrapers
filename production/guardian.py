@@ -51,9 +51,11 @@ for article in response_json["response"]["results"]:
                 if "Read more:" not in p.text:
                     if "Read more:" not in p.text:
                         if p.find('strong'):
-                            body.append({"type": "headline", "text": str(p.text)})
+                            text = str(p.text).replace('The Guardian', 'Informfully')
+                            body.append({"type": "headline", "text": text})
                         else:
-                            body.append({"type": "text", "text": str(p.text)})
+                            text = str(p.text).replace('The Guardian', 'Informfully')
+                            body.append({"type": "text", "text": text})
             document = create_article(
                     url=article['webUrl'],                  # string
                     primary_category=article['sectionId'],  # string

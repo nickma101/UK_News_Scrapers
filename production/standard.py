@@ -65,11 +65,16 @@ def scrape_article(article):
     body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
     other_paragraphs = paragraphs[1:]
     for p in other_paragraphs:
-        if "Read more:" not in p.text:
+        if ("Read more:" not in p.text and
+                "Sign up for exclusive newsletters" not in p.text and
+                "By clicking Sign up you confirm that" not in p.text and
+                "This site is protected by reCAPTCHA" not in p.text):
             if p.find('strong'):
                 body.append({"type": "headline", "text": str(p.text)})
             else:
-                body.append({"type": "text", "text": str(p.text)})
+                text = str(p.text).replace('The Standard', 'Informfully')
+                body.append({"type": "text", "text": text})
+
 
     document = create_article(
         url=article['url'],                                         # string

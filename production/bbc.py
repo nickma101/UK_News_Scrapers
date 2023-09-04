@@ -43,9 +43,11 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if "Watch:" not in p.text and "This video can not be played" not in p.text:
             if p.find('b'):
-                body.append({"type": "headline", "text": str(p.text)})
+                text = str(p.text).replace('The BBC', 'Informfully')
+                body.append({"type": "headline", "text": text})
             else:
-                body.append({"type": "text", "text": str(p.text)})
+                text = str(p.text).replace('The BBC', 'Informfully')
+                body.append({"type": "text", "text": text})
     # body = '<br/>'.join([str(b.text) for b in bodies])
     categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
     try:

@@ -15,6 +15,9 @@ NEWS_FEEDS = [{'url': "https://feeds.skynews.com/feeds/rss/home.xml", 'category'
               {'url':"https://feeds.skynews.com/feeds/rss/entertainment.xml", 'category': "entertainment"}]
 NEWS_LANGUAGE = "en-UK"
 
+DEFAULT_AUTHOR = "NONE"
+DEFAULT_CATEGORY = "NONE"
+
 date = datetime.utcnow()
 
 # Read the RSS feed and retrieve URL and article metadata
@@ -48,31 +51,33 @@ def scrape_article(article, category):
     for p in filtered_paragraphs:
         if "Read more:" not in p.text:
             if p.find('strong'):
-                body.append({"type": "headline", "text": str(p.text)})
+                text = str(p.text).replace('Sky News', 'Informfully')
+                body.append({"type": "headline", "text": text})
             else:
-                body.append({"type": "text", "text": str(p.text)})
+                text = str(p.text).replace('Sky News', 'Informfully')
+                body.append({"type": "text", "text": text})
+
     datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split(',',1)[0]
     published = parser.parse(datestring)
 
 
-    try:
-        author = soup.find('span', {'class': 'sdc-article-author__name'}).text
-    except:
-        author = "None"
+    author = soup.find('span', {'class': 'sdc-article-author__name'}).text
+    if len(author) == 0:
+        author = DEFAULT_AUTHOR
 
     document = create_article(
         url=article['url'],
-        primary_category=category,  # string
-        sub_categories="None",      # string
-        title=article['title'],     # string
-        lead=article['lead'],       # string
-        author=author,              # string
-        date_published=published,   # datetime
-        date_updated=published,     # datetime - NEEDS WORK
-        language=NEWS_LANGUAGE,     # string
-        outlet=NEWS_OUTLET,         # string
-        image=article['image'],     # image
-        body=body                   # list of dictionaries
+        primary_category=category,          # string
+        sub_categories=DEFAULT_CATEGORY,    # string
+        title=article['title'],             # string
+        lead=article['lead'],               # string
+        author=author,                      # string
+        date_published=published,           # datetime
+        date_updated=published,             # datetime - NEEDS WORK
+        language=NEWS_LANGUAGE,             # string
+        outlet=NEWS_OUTLET,                 # string
+        image=article['image'],             # image
+        body=body                           # list of dictionaries
     )
     return document
 

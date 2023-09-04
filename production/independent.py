@@ -59,10 +59,11 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if "Read more:" not in p.text:
             if p.find('strong'):
-                body.append({"type": "headline", "text": str(p.text)})
+                text = str(p.text).replace('The Independent', 'Informfully')
+                body.append({"type": "headline", "text": text})
             else:
-                body.append({"type": "text", "text": str(p.text)})
-
+                text = str(p.text).replace('The Independent', 'Informfully')
+                body.append({"type": "text", "text": text})
     document = create_article(
         url=article['url'],                                         # string
         primary_category=article['primaryCategory'][0]['term'],     # string

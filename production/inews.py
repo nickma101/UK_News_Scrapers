@@ -36,9 +36,11 @@ def scrape_article(url):
     body = []
     for p in paragraphs:
         if p.find('strong'):
-            body.append({"type": "headline", "text": str(p.text)})
+            text = str(p.text).replace('INews', 'Informfully')
+            body.append({"type": "headline", "text": text})
         else:
-            body.append({"type": "text", "text": str(p.text)})
+            text = str(p.text).replace('INews', 'Informfully')
+            body.append({"type": "text", "text": text})
     date_string = soup.find('span', {'class': 'inews__post__pubdate'}).get_text()
     date_format = "%B %d, %Y %I:%M %p"
     published = datetime.strptime(date_string, date_format)
