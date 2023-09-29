@@ -53,10 +53,10 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
+    # scrape article text
     divs = soup.find('div', {'class': 'sc-evdWiO iHBFwX'})
     paragraphs = []
     first_letter = divs.find('span').text
-
     for div in divs:
         block = div.find_all('p')
         paragraphs.extend(block)
@@ -74,11 +74,39 @@ def scrape_article(article):
             else:
                 text = str(p.text).replace('The Standard', 'Informfully')
                 body.append({"type": "text", "text": text})
-
-
+    # scrape category
+    category = article['primaryCategory'][0]['term']
+    # rename categories
+    if category == 'Business' or category == 'Business News':
+        category = 'business'
+    if category == 'Crime':
+        category = 'crime'
+    if category == 'Environment':
+        category = 'environment'
+    if category == 'Film' or category == 'Music' or category == 'Showbiz' or category == 'Celebrity News':
+        category = 'entertainment&arts'
+    if category == 'Football':
+        category = 'football'
+    if category == 'Health':
+        category = 'health'
+    if category == 'Fashion':
+        category = 'lifeandstyle'
+    if category == 'Money':
+        category = 'money'
+    if category == 'Politics':
+        category = 'politics'
+    if category == 'Boxing' or category == 'Golf':
+        category = 'sport'
+    if category == 'Tech':
+        category = 'technology'
+    if category == 'UK':
+        category = 'uk news'
+    if category == 'World':
+        category = 'world'
+    # create article
     document = create_article(
         url=article['url'],                                         # string
-        primary_category=article['primaryCategory'][0]['term'],     # string
+        primary_category=category,     # string
         sub_categories="None",                                      # string
         title=article['title'],                                     # string
         lead=remove_html_tags(article['lead']),                     # string
@@ -102,8 +130,8 @@ def scrape():
         for article in rss_results:
             try:
                 new_article = scrape_article(article)
-
-                if new_article:
+                # check if article is eligible for recommendation
+                if new_article and len(new_article['body']) >= 7:
                     newsarticles_collection.append(new_article)
             except Exception as e:
                 print(f"Couldn't scrape article: {article['url']}")

@@ -37,7 +37,7 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
-    # bodies = soup.findAll({'p': {'data-component': 'text-block'}})
+    # scrape article text
     filtered_paragraphs = [p for p in soup.findAll({'p': {'data-component': 'text-block'}})]
     body = []
     for p in filtered_paragraphs:
@@ -48,26 +48,43 @@ def scrape_article(article):
             else:
                 text = str(p.text).replace('The BBC', 'Informfully')
                 body.append({"type": "text", "text": text})
-    # body = '<br/>'.join([str(b.text) for b in bodies])
-    categories = soup.find_all('li', {'class': 'ssrcss-shgc2t-StyledMenuItem eis6szr3'})
+    # scrape category
+    categories = soup.find_all('li', {'class': 'ssrcss-s23s7z-StyledMenuItem eis6szr3'})
     try:
-        related_categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-w6az1r-StyledLink ed0g1kj0'})]
+        related_categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-12oaa2e-StyledLink eis6szr2'})]
     except:
         related_categories = ''
     if categories[0].text == "Science" and "Climate change" in related_categories:
         primary_category = 'environment'
     else:
        primary_category = categories[0].text
+    # reformat category names
+    if primary_category == 'Business':
+        primary_category = 'business'
+    if primary_category == 'Entertainment & Arts':
+        primary_category = 'entertainment&arts'
+    if primary_category == 'Health':
+        primary_category = 'health'
+    if primary_category == 'Politics':
+        primary_category = 'politics'
+    if primary_category == 'Science':
+        primary_category = 'science'
+    if primary_category == 'Tech':
+        primary_category = 'technology'
+    if primary_category == 'UK':
+        primary_category = 'uk news'
+    if primary_category == 'World':
+        primary_category = 'world'
     try:
         sub_categories = ','.join([str(c.text) for c in categories[1:]])
     except: sub_categories = "None"
+    # scrape image
     image = soup.find('img').get("src")
+    # scrape author
     try:
         author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text
     except:
         author = "No author"
-
-    # date_updated = "None"
 
     document = create_article(
         url=article['url'],                             # string
@@ -94,7 +111,8 @@ def scrape():
         for article in rss_results:
             try:
                 new_article = scrape_article(article)
-                if new_article:
+                # check if article is eligible for recommendation
+                if new_article and len(new_article['body']) >= 7:
                     newsarticles_collection.append(new_article)
             except Exception as e:
                 print(f"Couldn't scrape article: {article['url']}")

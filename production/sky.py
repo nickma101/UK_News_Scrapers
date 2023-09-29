@@ -7,12 +7,12 @@ from dateutil import parser
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "SkyNews"
 NEWS_FEEDS = [{'url': "https://feeds.skynews.com/feeds/rss/home.xml", 'category': "home"},
-              {'url': "https://feeds.skynews.com/feeds/rss/uk.xml", 'category': "uk"},
+              {'url': "https://feeds.skynews.com/feeds/rss/uk.xml", 'category': "uk news"},
               {'url':"https://feeds.skynews.com/feeds/rss/world.xml", 'category': "world"},
               {'url':"https://feeds.skynews.com/feeds/rss/business.xml", 'category': "business"},
               {'url':"https://feeds.skynews.com/feeds/rss/politics.xml", 'category': "politics"},
               {'url':"https://feeds.skynews.com/feeds/rss/technology.xml", 'category': "technology"},
-              {'url':"https://feeds.skynews.com/feeds/rss/entertainment.xml", 'category': "entertainment"}]
+              {'url':"https://feeds.skynews.com/feeds/rss/entertainment.xml", 'category': "entertainment&arts"}]
 NEWS_LANGUAGE = "en-UK"
 
 DEFAULT_AUTHOR = "NONE"
@@ -41,6 +41,7 @@ def get_rss_feed(feed):
 def scrape_article(article, category):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
+    # scrape article text
     divs = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
     all_paragraphs = []
     for div in divs:
@@ -56,15 +57,17 @@ def scrape_article(article, category):
             else:
                 text = str(p.text).replace('Sky News', 'Informfully')
                 body.append({"type": "text", "text": text})
-
+    # scrape date
     datestring = soup.find('p', {'class': 'sdc-article-date__date-time'}).text.split(',',1)[0]
     published = parser.parse(datestring)
-
-
-    author = soup.find('span', {'class': 'sdc-article-author__name'}).text
-    if len(author) == 0:
-        author = DEFAULT_AUTHOR
-
+    # scrape author
+    try:
+        author = soup.find('span', {'class': 'sdc-article-author__name'}).text
+    except:
+        author = "None"
+    #if len(author) == 0:
+    #    author = DEFAULT_AUTHOR
+    # create article
     document = create_article(
         url=article['url'],
         primary_category=category,          # string
@@ -94,9 +97,9 @@ def scrape():
         for article in rss_results:
             try:
                 new_article = scrape_article(article, category)
-
-                if new_article:
-                    newsarticles_collection.append(new_article)
+                # check if article is eligible for recommendation
+                if new_article and len(new_article['body']) >= 7 and new_article['image'] != "None":
+                   newsarticles_collection.append(new_article)
             except Exception as e:
                 print(f"Couldn't scrape article: {article['url']}")
                 print(e)

@@ -20,27 +20,31 @@ query_params = {
     "page-size": 200,                               # max allowed by the API
 }
 
-
-response = requests.get(base_url, params=query_params)
-
-response_json = json.loads(response.text)
-
-
 NEWS_LANGUAGE = 'en-UK'
 NEWS_OUTLET = 'GuardianInt'
 
-documentCollection = []
-
 blacklist = ["crosswords"]
+
+response = requests.get(base_url, params=query_params)
+response_json = json.loads(response.text)
+
+documentCollection = []
 
 for article in response_json["response"]["results"]:
 
-    if (article['sectionId'] not in blacklist) and ('corrections-and-clarifications' not in article['webUrl']) :
+    if (article['sectionId'] not in blacklist) and ('corrections-and-clarifications' not in article['webUrl']):
 
         try:
             datestring = article['webPublicationDate']
             datetime_obj = datetime.strptime(datestring, "%Y-%m-%dT%H:%M:%SZ")
             published = datetime_obj.strftime("%Y-%m-%d %H:%M:%S")
+            category = article['sectionId']
+            # reorganise categories
+            if category == 'fashion':
+                category = 'lifeandstyle'
+            if category == 'artanddesign' or category == 'film' or category == 'music':
+                category = 'entertainment&arts'
+            # scrape body text and save as dictionary
             soup = BeautifulSoup(article['fields']['body'], 'html.parser')
             all_paragraphs = []
             for e in soup.find_all('p'):
@@ -56,9 +60,10 @@ for article in response_json["response"]["results"]:
                         else:
                             text = str(p.text).replace('The Guardian', 'Informfully')
                             body.append({"type": "text", "text": text})
+            # create article
             document = create_article(
                     url=article['webUrl'],                  # string
-                    primary_category=article['sectionId'],  # string
+                    primary_category=category,              # string
                     sub_categories="None",                  # string
                     title=article['webTitle'],              # string
                     lead=article['fields']['trailText'],    # string
@@ -70,7 +75,11 @@ for article in response_json["response"]["results"]:
                     image=article['fields']['thumbnail'],   # string
                     body=body                               # list of dictionaries
                 )
-            documentCollection.append(document)
+            # filter out short articles
+            if len(body) >= 7:
+                documentCollection.append(document)
+            else:
+                pass
 
         except:
             pass

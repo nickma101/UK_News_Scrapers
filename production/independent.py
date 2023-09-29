@@ -49,7 +49,8 @@ def get_rss_feed(feed):
 def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
-    divs = soup.find('div', {'class': 'sc-cvxyxr-2 frrzmY main-wrapper'})
+    # scrape article body
+    divs = soup.find('div', {'class': 'sc-fwko30-0 dQSjZS main-wrapper'})
     all_paragraphs = []
     for div in divs:
         paragraphs = div.find_all('p')
@@ -64,9 +65,27 @@ def scrape_article(article):
             else:
                 text = str(p.text).replace('The Independent', 'Informfully')
                 body.append({"type": "text", "text": text})
+    # scrape category
+    category = article['primaryCategory'][0]['term']
+    # rename categories
+    if category == 'Crime':
+        category = 'crime'
+    if category == 'Football':
+        category = 'football'
+    if category == 'Health &amp; Families':
+        category = 'health'
+    if category == 'Fashion' or category == 'Lofestyle':
+        category = 'lifeandstyle'
+    if category == 'UK Politics':
+        category = 'politics'
+    if category == 'Sport' or category == 'Cricket' or category == 'Golf':
+        category = 'sport'
+    if category == 'UK':
+        category = 'uk news'
+
     document = create_article(
         url=article['url'],                                         # string
-        primary_category=article['primaryCategory'][0]['term'],     # string
+        primary_category=category,                                  # string
         sub_categories="None",                                      # string
         title=article['title'],                                     # string
         lead=article['lead'],                                       # string
@@ -90,8 +109,8 @@ def scrape():
         for article in rss_results:
             try:
                 new_article = scrape_article(article)
-
-                if new_article:
+                # check if article is eligible for recommendation
+                if new_article and len(new_article['body']) >= 7 and new_article['image'] != "None":
                     newsarticles_collection.append(new_article)
             except Exception as e:
                 print(f"Couldn't scrape article: {article['url']}")
@@ -104,5 +123,6 @@ def scrape():
         json.dump(newsarticles_collection, file, default=str)
 
     return newsarticles_collection
+
 
 scrape()
