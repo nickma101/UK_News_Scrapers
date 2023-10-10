@@ -101,7 +101,7 @@ def scrape_article(article):
     # create article
     document = create_article(
         url=article['url'],                                         # string
-        primary_category=category,     # string
+        primary_category=category,                                  # string
         sub_categories="None",                                      # string
         title=article['title'],                                     # string
         lead=remove_html_tags(article['lead']),                     # string

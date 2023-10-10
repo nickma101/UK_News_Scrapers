@@ -67,18 +67,18 @@ for article in response_json["response"]["results"]:
                         body.append({"type": "text", "text": text})
                         # create article
                         document = create_article(
-                            url=article['webUrl'],  # string
-                            primary_category=category,  # string
-                            sub_categories="None",  # string
-                            title=article['webTitle'],  # string
-                            lead=article['fields']['trailText'],  # string
-                            author=author,  # string
-                            date_published=published,  # datetime
-                            date_updated=published,  # datetime NEEDS WORK
-                            language=NEWS_LANGUAGE,  # string
-                            outlet=NEWS_OUTLET,  # string
-                            image=article['fields']['thumbnail'],  # string
-                            body=body  # list of dictionaries
+                            url=article['webUrl'],                  # string
+                            primary_category=category,              # string
+                            sub_categories="None",                  # string
+                            title=article['webTitle'],              # string
+                            lead=article['fields']['trailText'],    # string
+                            author=author,                          # string
+                            date_published=published,               # datetime
+                            date_updated=published,                 # datetime NEEDS WORK
+                            language=NEWS_LANGUAGE,                 # string
+                            outlet=NEWS_OUTLET,                     # string
+                            image=article['fields']['thumbnail'],   # string
+                            body=body                               # list of dictionaries
                         )
         # filter out short articles
         if len(body) >= 7:
