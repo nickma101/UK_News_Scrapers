@@ -75,6 +75,23 @@ def scrape_article(article):
         sub_categories = ', '.join([str(c) for c in categories[1:]])
     if len(sub_categories) == 0:
         sub_categories = DEFAULT_CATEGORY
+    # reformat category names
+    if primary_category == 'Business':
+        primary_category = 'business'
+    if primary_category == 'Entertainment & Arts':
+        primary_category = 'entertainment&arts'
+    if primary_category == 'Health':
+        primary_category = 'health'
+    if primary_category == 'Politics':
+        primary_category = 'politics'
+    if primary_category == 'Science':
+        primary_category = 'science'
+    if primary_category == 'Tech':
+        primary_category = 'technology'
+    if primary_category == 'UK':
+        primary_category = 'uk news'
+    if primary_category == 'World':
+        primary_category = 'world'
     # Image
     main_image = soup.find('img').get("src")
     # Author
