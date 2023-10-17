@@ -56,22 +56,33 @@ def scrape_article(url):
     # scrape image
     image = soup.find('img', {'class': 'w-100'})
     if hasattr(image, 'src'):
-        image_src = soup.find('img', {'class': 'w-100'})
+        image_src = image.get('src')
     else:
         image_src = "None"
     # scrape article body
     content = soup.find('div', {'class': 'article-content'})
     paragraphs = soup.find_all('p', content)
-    for p in paragraphs:
-        for a_tag in p.find_all('a'):
-            a_tag.extract()
     body = []
     for p in paragraphs:
         if p.find('strong'):
-            text = str(p.text).replace('INews', 'Informfully')
+            text = ""
+            for element in p.contents:
+                if isinstance(element, str):
+                    text += element
+                elif element.name == 'a':
+                    # If it's an <a> tag, extract the link text
+                    text += element.get_text()
+            text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
             body.append({"type": "headline", "text": text})
         else:
-            text = str(p.text).replace('INews', 'Informfully')
+            text = ""
+            for element in p.contents:
+                if isinstance(element, str):
+                    text += element
+                elif element.name == 'a':
+                    # If it's an <a> tag, extract the link text
+                    text += element.get_text()
+            text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
             body.append({"type": "text", "text": text})
     # scrape date
     try:
