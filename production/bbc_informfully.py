@@ -44,6 +44,12 @@ def get_rss_feed(feed):
 
     return article_list
 
+# filter out text snippets that should not be scraped for the main text
+def should_filter(p):
+    text = p.get_text()
+    class_list = p.get('class')
+    return "Watch:" not in text and "This video can not be played" not in text and "BBC is not responsible" not in text and "ssrcss-17zglt8-PromoHeadline" not in class_list
+
 
 # Scrape individual articles and combine existing RSS meta-data with text from website
 def scrape_article(article):
@@ -55,11 +61,13 @@ def scrape_article(article):
     sub_categories = []
     # Body (excluding videos)
     for p in filtered_paragraphs:
-        if "Watch:" not in p.text and "This video can not be played" not in p.text:
+        #if "Watch:" not in p.text and "This video can not be played" not in p.text and "ssrcss-17zglt8-PromoHeadline" not in p.get('class') and "BBC is not responsible" not in p.text:
+        if should_filter(p):
             if p.find('b'):
                 body.append({"type": "headline", "text": str(p.text)})
             else:
-                body.append({"type": "text", "text": str(p.text)})
+                text = str(p.text).replace('the BBC', 'Informfully').replace('BBC', 'Informfully')
+                body.append({"type": "text", "text": text})
     # Categories (all categories of an article)
     categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-w6az1r-StyledLink ed0g1kj0'})]
     # Filter categories of interests
@@ -95,7 +103,7 @@ def scrape_article(article):
     # Image
     main_image = soup.find('img').get("src")
     # Author
-    author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text
+    author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text.replace('By ', '')
     if len(author) == 0:
         author = DEFAULT_AUTHOR
     # Full article (JSON format document for database collection)
@@ -133,7 +141,7 @@ def scrape():
                 print(f"Couldn't scrape article: {article['url']}")
                 print(e)
                 skipped_articles += 1
-    #print(retrieved_articles, skipped_articles, newsarticles_collection)
+    print(retrieved_articles, skipped_articles)
     dateString = str(date)[:10]
     filename = "bbc_articles" + dateString + ".json"
     desired_dir = "data"
