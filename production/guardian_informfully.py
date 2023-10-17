@@ -24,13 +24,15 @@ NEWS_LANGUAGE = 'en-UK'
 NEWS_OUTLET = 'GuardianInt'
 DEFAULT_AUTHOR = 'None'
 
-blacklist = ["crosswords"]
+blacklist = ["crosswords", '/live']
 
 response = requests.get(base_url, params=query_params)
 response_json = json.loads(response.text)
 
 documentCollection = []
 
+retrieved_articles = 0
+skipped_articles = 0
 for article in response_json["response"]["results"]:
 
     if (article['sectionId'] not in blacklist) and ('corrections-and-clarifications' not in article['webUrl']):
@@ -58,36 +60,38 @@ for article in response_json["response"]["results"]:
         body = []
         for p in filtered_paragraphs:
             if "Read more:" not in p.text:
-                if "Read more:" not in p.text:
-                    if p.find('strong'):
-                        text = str(p.text).replace('The Guardian', 'Informfully')
-                        body.append({"type": "headline", "text": text})
-                    else:
-                        text = str(p.text).replace('The Guardian', 'Informfully')
-                        body.append({"type": "text", "text": text})
-                        # create article
-                        document = create_article(
-                            url=article['webUrl'],                  # string
-                            primary_category=category,              # string
-                            sub_categories="None",                  # string
-                            title=article['webTitle'],              # string
-                            lead=article['fields']['trailText'],    # string
-                            author=author,                          # string
-                            date_published=published,               # datetime
-                            date_updated=published,                 # datetime NEEDS WORK
-                            language=NEWS_LANGUAGE,                 # string
-                            outlet=NEWS_OUTLET,                     # string
-                            image=article['fields']['thumbnail'],   # string
-                            body=body                               # list of dictionaries
-                        )
+                if p.find('strong'):
+                    text = str(p.text).replace('The Guardian', 'Informfully')
+                    body.append({"type": "headline", "text": text})
+                else:
+                    text = str(p.text).replace('The Guardian', 'Informfully')
+                    body.append({"type": "text", "text": text})
+                # create article
+                document = create_article(
+                    url=article['webUrl'],                  # string
+                    primary_category=category,              # string
+                    sub_categories="None",                  # string
+                    title=article['webTitle'],              # string
+                    lead=article['fields']['trailText'],    # string
+                    author=author,                          # string
+                    date_published=published,               # datetime
+                    date_updated=published,                 # datetime NEEDS WORK
+                    language=NEWS_LANGUAGE,                 # string
+                    outlet=NEWS_OUTLET,                     # string
+                    image=article['fields']['thumbnail'],   # string
+                    body=body                               # list of dictionaries
+                )
         # filter out short articles
-        if len(body) >= 7:
+        if len(body) >= 7 and '/live' not in document['url']:
             documentCollection.append(document)
+            retrieved_articles += 1
         else:
+            skipped_articles += 1
             pass
 
     else:
         print(article['webUrl'])
+print(retrieved_articles, skipped_articles)
 
 dateString = str(date)[:10]
 filename = "guardian_articles"+dateString+".json"
