@@ -5,8 +5,10 @@ from datetime import datetime, timedelta
 
 NEWS_OUTLET = "INews"
 NEWS_LANGUAGE = "en-UK"
-NEWS_FEEDS = ["https://inews.co.uk/category/news/environment", "https://inews.co.uk/category/news/politics",
-              "https://inews.co.uk/category/news/sport", "https://inews.co.uk/category/news/money",
+NEWS_FEEDS = ["https://inews.co.uk/category/news/environment",
+              "https://inews.co.uk/category/news/politics",
+              "https://inews.co.uk/category/news/sport",
+              "https://inews.co.uk/category/news/money",
               "https://inews.co.uk/category/news/culture"]
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
@@ -23,7 +25,9 @@ def scrape_sitemap(url):
 
 
 def scrape_article(url):
+
     response = requests.get(url)
+
     # determine category
     if url != "http://www.w3.org/2000/svg><defs><clippath":
         pattern1 = r'/news/([^/]+)/'
@@ -34,34 +38,42 @@ def scrape_article(url):
             category = re.findall(pattern2, url)[0]
     else:
         category = "None"
+
     # reorganise categories
     if category == 'culture':
         category = 'entertainment&arts'
     if category == 'inews-lifestyle':
         category = 'lifeandstyle'
+
     soup = BeautifulSoup(response.content, 'html.parser')
+
     # scrape title
     if hasattr(soup.find('h1', {'class': 'headline'}), 'text'):
         title = soup.find('h1', {'class': 'headline'}).get_text()
     else:
         title = "None"
+
     # scrape lead
     lead = soup.find('h2').get_text()
+
     # scrape author
     authorbox = soup.find('div', {'class': 'inews__post-byline__author-link'})
     if authorbox:
         author = authorbox.find('a').get_text()
     else:
         author = "None"
+
     # scrape image
     image = soup.find('img', {'class': 'w-100'})
     if hasattr(image, 'src'):
         image_src = image.get('src')
     else:
         image_src = "None"
+
     # scrape article body
     content = soup.find('div', {'class': 'article-content'})
     paragraphs = soup.find_all('p', content)
+
     body = []
     for p in paragraphs:
         if p.find('strong'):
@@ -84,6 +96,7 @@ def scrape_article(url):
                     text += element.get_text()
             text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
             body.append({"type": "text", "text": text})
+
     # scrape date
     try:
         date_string = soup.find('span', {'class': 'inews__post__pubdate'}).get_text()
@@ -98,6 +111,7 @@ def scrape_article(url):
         updated = soup.find('span', {'class': 'inews__post__moddate'}).get_text()
     except:
         updated = 'None'
+
     #create article
     document = create_article(
         url=url,                                # string
@@ -117,9 +131,11 @@ def scrape_article(url):
 
 
 def scrape_articles():
+
     articles = []
     retrieved_articles = 0
     skipped_articles = 0
+
     for feed in NEWS_FEEDS:
         urls = scrape_sitemap(feed)
         for url in urls:
@@ -131,16 +147,18 @@ def scrape_articles():
                 retrieved_articles += 1
             else:
                 skipped_articles += 1
-    print(retrieved_articles, skipped_articles)
-    dateString = str(date)[:10]
-    filename = "inews_articles" + dateString + ".json"
-    desired_dir = "data"
-    full_path = os.path.join(desired_dir, filename)
 
-    with open(full_path, "w") as file:
-        json.dump(articles, file, default=str)
+    print(retrieved_articles, skipped_articles)
+
+#    dateString = str(date)[:10]
+#    filename = "inews_articles" + dateString + ".json"
+#    desired_dir = "data"
+#    full_path = os.path.join(desired_dir, filename)
+
+#    with open(full_path, "w") as file:
+#        json.dump(articles, file, default=str, ensure_ascii=False)
 
     return articles
 
 
-scrape_articles()
+# scrape_articles()
