@@ -47,7 +47,7 @@ def scrape_article(article, category):
     for div in divs:
         paragraphs = div.find_all('p')
         all_paragraphs.extend(paragraphs)
-    filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
+    filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')][1:]
     body = []
     for p in filtered_paragraphs:
         if "Read more:" not in p.text:

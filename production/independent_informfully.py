@@ -4,20 +4,23 @@ from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
 
-
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
 NEWS_FEEDS = ["https://www.independent.co.uk/news/uk/rss", "https://www.independent.co.uk/climate-change/news/rss", "https://www.independent.co.uk/environment/rss", "https://www.independent.co.uk/sport/rss", "https://www.independent.co.uk/arts-entertainment/rss", "https://www.independent.co.uk/travel/rss", "https://www.independent.co.uk/life-style/rss"]
 NEWS_LANGUAGE = "en-UK"
-
+DEFAULT_AUTHOR = "NONE"
+DEFAULT_CATEGORY = "NONE"
 date = datetime.utcnow()
+
 
 # Read the RSS feed and retrieve URL and article metadata
 def get_rss_feed(feed):
+
     article_list = []
     newsFeed = feedparser.parse(feed)
 
     for rss_article in newsFeed.entries:
+
         # Collection to hold the article specific metadata
         article_props = {}
         article_props['url'] = rss_article.link
@@ -60,10 +63,10 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if "Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and "Read more from" not in p.text:
             if p.find('strong'):
-                text = str(p.text).replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
+                text = str(p.text).replace('\"', '"').replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
                 body.append({"type": "headline", "text": text})
             else:
-                text = str(p.text).replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
+                text = str(p.text).replace('/"', '"').replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
                 body.append({"type": "text", "text": text})
     # scrape category
     category = article['primaryCategory'][0]['term']
