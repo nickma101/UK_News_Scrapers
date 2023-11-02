@@ -58,7 +58,7 @@ def scrape_article(article):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # scrape article body
-    divs = soup.find('div', {'class': 'sc-fwko30-0 dQSjZS main-wrapper'})
+    divs = soup.find('div', {'class': 'sc-1fcmxs3-1 sc-1i4xxi7-1 hWGOwK dnhtQj'})
     all_paragraphs = []
 
     for div in divs:
@@ -87,7 +87,7 @@ def scrape_article(article):
         category = 'football'
     if category == 'Health &amp; Families':
         category = 'health'
-    if category == 'Fashion' or category == 'Lofestyle':
+    if category == 'Fashion' or category == 'Lifestyle':
         category = 'lifeandstyle'
     if category == 'UK Politics':
         category = 'politics'

@@ -162,4 +162,4 @@ def scrape():
 
     return newsarticles_collection
 
-# scrape()
+scrape()

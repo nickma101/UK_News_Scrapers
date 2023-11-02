@@ -54,26 +54,27 @@ def scrape_article(article):
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
     # scrape article text
-    divs = soup.find('div', {'class': 'sc-evdWiO iHBFwX'})
+    divs = soup.find('div', {'class': 'sc-enDNfw iLaNIc'})
     paragraphs = []
-    first_letter = divs.find('span').text
+    #first_letter = divs.find('span').text
     for div in divs:
-        block = div.find_all('p')
+        block = div.find_all(['p', 'h2'])
         paragraphs.extend(block)
     body = []
-    first_paragraph = paragraphs[0]
-    body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
-    other_paragraphs = paragraphs[1:]
-    for p in other_paragraphs:
+    #first_paragraph = paragraphs[0]
+    #body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
+    #other_paragraphs = paragraphs[1:]
+    for p in paragraphs:
         if ("Read more:" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
-            if p.find('strong'):
-                body.append({"type": "headline", "text": str(p.text)})
+            if p.name == 'h2':
+                cleaned_text = p.get_text().replace('"', "'")
+                body.append({"type": "headline", "text": cleaned_text})
             else:
-                text = str(p.text).replace('The Standard', 'Informfully')
-                body.append({"type": "text", "text": text})
+                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'")
+                body.append({"type": "text", "text": cleaned_text})
     # scrape category
     category = article['primaryCategory'][0]['term']
     # rename categories
@@ -124,6 +125,8 @@ def scrape_article(article):
 # The scraper will retrieve news article URLs from the RSS feed and parse the HTML documents
 def scrape():
     newsarticles_collection = []  # Collection to store complete articles
+    retrieved_articles = 0
+    skipped_articles = 0
 
     for feed in NEWS_FEEDS:
         rss_results = get_rss_feed(feed)  # Get partial article information from RSS feeds
@@ -133,15 +136,22 @@ def scrape():
                 # check if article is eligible for recommendation
                 if new_article and len(new_article['body']) >= 7:
                     newsarticles_collection.append(new_article)
+                    retrieved_articles += 1
             except Exception as e:
                 print(f"Couldn't scrape article: {article['url']}")
+                print(e)
+                skipped_articles += 1
+
+    print(retrieved_articles, skipped_articles)
+
+
     dateString = str(date)[:10]
     filename = "standard_articles" + dateString + ".json"
     desired_dir = "data"
     full_path = os.path.join(desired_dir, filename)
 
     with open(full_path, "w") as file:
-        json.dump(newsarticles_collection, file, default=str)
+        json.dump(newsarticles_collection, file, default=str, ensure_ascii=False)
 
     return newsarticles_collection
 
