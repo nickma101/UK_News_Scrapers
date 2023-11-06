@@ -90,14 +90,16 @@ def scrape_article(article):
         category = 'football'
     if category == 'Health':
         category = 'health'
-    if category == 'Fashion':
+    if category == 'Fashion' or category == 'Lifestyle':
         category = 'lifeandstyle'
     if category == 'Money':
         category = 'money'
     if category == 'Politics':
         category = 'politics'
-    if category == 'Boxing' or category == 'Golf':
+    if category == 'Boxing' or category == 'Golf' or category == 'F1':
         category = 'sport'
+    if category == 'Science':
+        category = 'science'
     if category == 'Tech':
         category = 'technology'
     if category == 'UK':
