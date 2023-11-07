@@ -30,7 +30,7 @@ def get_rss_feed(feed):
         article_props = {}
         article_props['url'] = rss_article.link
         article_props['title'] = rss_article.title
-        article_props['lead'] = rss_article.summary
+        article_props['lead'] = rss_article.summary.replace('"', "'")
         article_props['image'] = rss_article.media_content[0].get('url')
         article_list.append(article_props)
 
@@ -54,7 +54,7 @@ def scrape_article(article, category):
     body = []
 
     for p in filtered_paragraphs:
-        if "Read more:" not in p.text:
+        if "Read more" not in p.text:
             if p.find('strong'):
                 text = str(p.text).replace('Sky News', 'Informfully').replace('"', "'")
                 body.append({"type": "headline", "text": text})
