@@ -23,21 +23,20 @@ def get_rss_feed(feed):
 
         # Collection to hold the article specific metadata
         article_props = {}
+        # retrieve url, title, and lead
         article_props['url'] = rss_article.link
         article_props['title'] = rss_article.title
         try:
             article_props['lead'] = rss_article.summary
         except:
             article_props['lead'] = "Click here to read more"
-        # Added conversion to make it an actual string
+        # retrieve publication date
         datestring = str(rss_article.published.split(" GMT")[0])
         # What the current date & time looks like, for reference: "Tue, 22 Aug 2023 09:44:11"
-        # print(rss_article.published)
         # Conversion to datetime and match target format of database
         converted_datetime = (datetime.strptime(datestring, '%a, %d %b %Y %H:%M:%S'))
         formatted_datetime = converted_datetime.strftime('%Y%m%d')
         article_props['date_published'] = formatted_datetime
-        # print(formatted_datetime)
         article_list.append(article_props)
 
     return article_list
@@ -46,7 +45,20 @@ def get_rss_feed(feed):
 def should_filter(p):
     text = p.get_text()
     class_list = p.get('class')
-    return "Watch:" not in text and "This video can not be played" not in text and "BBC is not responsible" not in text and "ssrcss-17zglt8-PromoHeadline" not in class_list
+
+    substrings_to_exclude = [
+        "Watch:",
+        "This video can not be played",
+        "BBC is not responsible",
+        "ssrcss-17zglt8-PromoHeadline",
+        "Sign up for our morning newsletter",
+        "Listen to Newsbeat live at",
+        "Follow BBC ",
+        "Follow the BBC "
+    ]
+
+    return all(substring not in text for substring in
+               substrings_to_exclude) and "ssrcss-17zglt8-PromoHeadline" not in class_list
 
 
 # Scrape individual articles and combine existing RSS meta-data with text from website
@@ -59,17 +71,20 @@ def scrape_article(article):
     primary_category = []
     sub_categories = []
 
-    # Body (excluding videos)
+    # Determine text type for main body
     for p in filtered_paragraphs:
-        #if "Watch:" not in p.text and "This video can not be played" not in p.text and "ssrcss-17zglt8-PromoHeadline" not in p.get('class') and "BBC is not responsible" not in p.text:
         if should_filter(p):
-            if p.find('b'):
-                body.append({"type": "headline", "text": p.get_text()})
+            text = p.get_text()
+            if text.startswith('"') and text.endswith('"'):
+                # If the text starts and ends with double quotation marks, treat it as a quote
+                cleaned_text = text.replace('"', "'")
+                body.append({"type": "quote", "text": cleaned_text})
+            # TODO: find headlines
             else:
                 cleaned_text = p.get_text().replace('the BBC', 'Informfully').replace('BBC', 'Informfully').replace('"', "'") #.replace('"', "'").replace('\u00a0', '').replace('\u00b0', '°').replace('\u2026','...').replace('\u2026','...').replace('\u00e1', 'á').replace('\u00c9', 'É')
                 body.append({"type": "text", "text": cleaned_text})
 
-    # Categories (all categories of an article)
+    # Categories (scrape all categories of an article)
     categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-w6az1r-StyledLink ed0g1kj0'})]
 
     # Filter categories of interests
@@ -108,9 +123,12 @@ def scrape_article(article):
     main_image = soup.find('img').get("src")
 
     # Author
-    author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text.replace('By ', '')
-    if len(author) == 0:
+    try:
+        author = soup.find('div', {'class': 'ssrcss-68pt20-Text-TextContributorName e8mq1e96'}).text.replace('By ', '')
+    except:
         author = DEFAULT_AUTHOR
+    #if len(author) == 0:
+    #    author = DEFAULT_AUTHOR
 
     # Full article (JSON format document for database collection)
     document = create_article(
