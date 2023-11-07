@@ -69,7 +69,11 @@ def scrape_article(article):
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
-            if p.name == 'h2':
+            if p.get_text().startswith('"') and p.get_text().endswith('"'):
+                # If the text starts and ends with double quotation marks, treat it as a quote
+                cleaned_text = p.get_text().replace('"', "'")
+                body.append({"type": "quote", "text": cleaned_text})
+            elif p.name == 'h2':
                 cleaned_text = p.get_text().replace('"', "'")
                 body.append({"type": "headline", "text": cleaned_text})
             else:
