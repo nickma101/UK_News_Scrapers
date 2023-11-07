@@ -57,9 +57,18 @@ def scrape_article(article):
     divs = soup.find('div', {'class': 'sc-enDNfw iLaNIc'})
     paragraphs = []
     #first_letter = divs.find('span').text
-    for div in divs:
-        block = div.find_all(['p', 'h2'])
+    if divs:
+        # Find all 'div' elements with class 'sc-kxZkPw kMnNar' and remove them
+        for unwanted_div in divs.find_all('div', {'class': 'sc-kxZkPw kMnNar'}):
+            unwanted_div.extract()
+
+        # Find and add all 'p' and 'h2' tags within the modified 'divs' element
+        block = divs.find_all(['p', 'h2'])
         paragraphs.extend(block)
+    # for div in divs:
+    #     if div.find('div', {'class': 'sc-kxZkPw kMnNar'}):
+    #     block = div.find_all(['p', 'h2'])
+    #    paragraphs.extend(block)
     body = []
     #first_paragraph = paragraphs[0]
     #body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
@@ -68,6 +77,8 @@ def scrape_article(article):
         if ("Read more:" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
+                "MORE ABOUT" not in p.text and
+                "Have your say..." not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
             if p.get_text().startswith('"') and p.get_text().endswith('"'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
