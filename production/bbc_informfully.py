@@ -46,7 +46,20 @@ def get_rss_feed(feed):
 def should_filter(p):
     text = p.get_text()
     class_list = p.get('class')
-    return "Watch:" not in text and "This video can not be played" not in text and "BBC is not responsible" not in text and "ssrcss-17zglt8-PromoHeadline" not in class_list
+
+    substrings_to_exclude = [
+        "Watch:",
+        "This video can not be played",
+        "BBC is not responsible",
+        "ssrcss-17zglt8-PromoHeadline",
+        "Sign up for our morning newsletter",
+        "Listen to Newsbeat live at",
+        "Follow BBC ",
+        "Follow the BBC "
+    ]
+
+    return all(substring not in text for substring in
+               substrings_to_exclude) and "ssrcss-17zglt8-PromoHeadline" not in class_list
 
 
 # Scrape individual articles and combine existing RSS meta-data with text from website
@@ -59,17 +72,20 @@ def scrape_article(article):
     primary_category = []
     sub_categories = []
 
-    # Body (excluding videos)
+    # Determine text type for main body
     for p in filtered_paragraphs:
-        #if "Watch:" not in p.text and "This video can not be played" not in p.text and "ssrcss-17zglt8-PromoHeadline" not in p.get('class') and "BBC is not responsible" not in p.text:
         if should_filter(p):
-            if p.find('b'):
-                body.append({"type": "headline", "text": p.get_text()})
+            text = p.get_text()
+            if text.startswith('"') and text.endswith('"'):
+                # If the text starts and ends with double quotation marks, treat it as a quote
+                cleaned_text = text.replace('"', "'")
+                body.append({"type": "quote", "text": cleaned_text})
+            # TODO: find headlines
             else:
                 cleaned_text = p.get_text().replace('the BBC', 'Informfully').replace('BBC', 'Informfully').replace('"', "'") #.replace('"', "'").replace('\u00a0', '').replace('\u00b0', '°').replace('\u2026','...').replace('\u2026','...').replace('\u00e1', 'á').replace('\u00c9', 'É')
                 body.append({"type": "text", "text": cleaned_text})
 
-    # Categories (all categories of an article)
+    # Categories (scrape all categories of an article)
     categories = [item.text for item in soup.find_all('a', {'class': 'ssrcss-w6az1r-StyledLink ed0g1kj0'})]
 
     # Filter categories of interests
