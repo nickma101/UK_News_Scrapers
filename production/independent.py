@@ -71,11 +71,16 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if "Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and "Read more from" not in p.text:
             if p.find('strong'):
-                text = str(p.text).replace('\"', '"').replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
+                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
                 body.append({"type": "headline", "text": text})
             else:
-                text = str(p.text).replace('/"', '"').replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
-                body.append({"type": "text", "text": text})
+                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully')
+                if text.startswith("'") and text.endswith("'"):
+                    body.append({"type": "quote", "text": text})
+                else:
+                    # filter out empty paragraphs
+                    if len(text) > 3:
+                        body.append({"type": "text", "text": text})
 
     # scrape category
     category = article['primaryCategory'][0]['term']

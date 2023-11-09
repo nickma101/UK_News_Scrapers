@@ -72,31 +72,25 @@ def scrape_article(url):
 
     # scrape article body
     content = soup.find('div', {'class': 'article-content'})
-    paragraphs = soup.find_all('p', content)
-
-    body = []
-    for p in paragraphs:
-        if p.find('strong'):
-            text = ""
-            for element in p.contents:
-                if isinstance(element, str):
-                    text += element
-                elif element.name == 'a':
-                    # If it's an <a> tag, extract the link text
-                    text += element.get_text()
-            text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
-            body.append({"type": "headline", "text": text})
-        else:
-            text = ""
-            for element in p.contents:
-                if isinstance(element, str):
-                    text += element
-                elif element.name == 'a':
-                    # If it's an <a> tag, extract the link text
-                    text += element.get_text()
-            text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
-            body.append({"type": "text", "text": text})
-
+    try:
+        paragraphs = content.find_all(['p', 'h1', 'h2'])
+        body = []
+        for p in paragraphs:
+            element_name = p.name
+            if element_name == 'h1' or element_name == 'h2':
+                text = p.get_text()
+                body.append({"type": "headline", "text": text})
+            else:
+                text = p.get_text()
+                if text.startswith('“') and text.endswith('”'):
+                    # If the text starts and ends with double quotation marks, treat it as a quote
+                    body.append({"type": "quote", "text": text})
+                else:
+                    text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
+                    body.append({"type": "text", "text": text})
+    except:
+        print("Something fishy here", url)
+        body = []
     # scrape date
     try:
         date_string = soup.find('span', {'class': 'inews__post__pubdate'}).get_text()
@@ -128,7 +122,6 @@ def scrape_article(url):
         body=body                               # list of dictionaries
     )
     return document
-
 
 def scrape_articles():
 
