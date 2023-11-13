@@ -3,6 +3,7 @@ import feedparser, requests, json, os, re
 from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
+from bson import json_util
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
@@ -150,7 +151,7 @@ def scrape():
     full_path = os.path.join(desired_dir, filename)
 
     with open(full_path, "w") as file:
-        json.dump(newsarticles_collection, file, default=str, ensure_ascii=False)
+        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
 
     return newsarticles_collection
 
