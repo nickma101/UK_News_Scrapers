@@ -3,6 +3,7 @@ import feedparser, requests, json, os
 from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
+from bson import json_util
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "SkyNews"
@@ -41,6 +42,9 @@ def scrape_article(article, category):
 
     response = requests.get(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
+
+    # scrape image
+    image = soup.find('img', {'class': 'sdc-article-image__item'})['src']
 
     # scrape article text
     divs = soup.find_all('div', {'data-component-name': 'sdc-article-body'})
@@ -84,7 +88,7 @@ def scrape_article(article, category):
         date_updated=published,             # datetime - NEEDS WORK
         language=NEWS_LANGUAGE,             # string
         outlet=NEWS_OUTLET,                 # string
-        image=article['image'],             # image
+        image=image,                        # image
         body=body                           # list of dictionaries
     )
     return document
@@ -121,7 +125,7 @@ def scrape():
     full_path = os.path.join(desired_dir, filename)
 
     with open(full_path, "w") as file:
-        json.dump(newsarticles_collection, file, default=str, ensure_ascii=False)
+        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
 
     return newsarticles_collection
 
