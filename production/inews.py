@@ -72,15 +72,16 @@ def scrape_article(url):
     else:
         image_src = "None"
 
-    # scrape article body
-    content = soup.find('div', {'class': 'article-content'})
     try:
+        content = soup.find('div', {'class': 'article-content'})
+        # content = filter(lambda element: len(element.attrs) <= 1, soup.find('div', {'class': 'article-content'}))
         paragraphs = content.find_all(['p', 'h1', 'h2'])
         body = []
         for p in paragraphs:
             element_name = p.name
             if element_name == 'h1' or element_name == 'h2':
                 text = p.get_text()
+                #if text != "Related Article":
                 body.append({"type": "headline", "text": text})
             else:
                 text = p.get_text()

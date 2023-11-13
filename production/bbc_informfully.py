@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import feedparser, requests, json, os, re
 from utils.utils import create_article
 from datetime import datetime
+from bson import json_util
 
 # Define the default name and feed of the news outlet
 
