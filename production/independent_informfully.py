@@ -59,7 +59,7 @@ def scrape_article(article):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # scrape article body
-    divs = soup.find('div', {'class': 'sc-jbiisr-0 cUUSOX sc-jbiisr-2 ifLoCP'})
+    divs = soup.find('div', {'class': 'sc-fwko30-0 iNpegk main-wrapper'})
     all_paragraphs = []
 
     for div in divs:
@@ -72,10 +72,10 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if "Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and "Read more from" not in p.text:
             if p.find('strong'):
-                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'")
+                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
                 body.append({"type": "headline", "text": text})
             else:
-                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("\n", " ")
+                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("\n", " ").replace("’", "'")
                 if text.startswith("'") and text.endswith("'"):
                     body.append({"type": "quote", "text": text})
                 else:
@@ -106,8 +106,8 @@ def scrape_article(article):
         url=article['url'],                                         # string
         primary_category=category,                                  # string
         sub_categories="None",                                      # string
-        title=article['title'],                                     # string
-        lead=article['lead'],                                       # string
+        title=article['title'].replace('‘', "'").replace('’', "'"), # string
+        lead=article['lead'].replace('‘', "'").replace('’', "'"),   # string
         author=article['author'],                                   # string
         date_published=article['date_published'],                   # datetime
         date_updated=article['date_updated'],                       # datetime
@@ -132,16 +132,20 @@ def scrape():
         retrieved_articles = 0
         skipped_articles = 0
         for article in rss_results:
-            try:
-                new_article = scrape_article(article)
-                # check if article is eligible for recommendation
-                if new_article and len(new_article['body']) >= 7 and new_article['image'] != "None":
-                    newsarticles_collection.append(new_article)
-                    retrieved_articles += 1
-            except Exception as e:
-                print(f"Couldn't scrape article: {article['url']}")
-                print(e)
-                skipped_articles += 1
+            if '- live' not in article['title']:
+                try:
+                    new_article = scrape_article(article)
+                    # check if article is eligible for recommendation
+                    if new_article and len(new_article['body']) >= 7 and new_article['image'] != "None":
+                        newsarticles_collection.append(new_article)
+                        retrieved_articles += 1
+                except Exception as e:
+                    print(f"Couldn't scrape article: {article['url']}")
+                    print(e)
+                    skipped_articles += 1
+            else:
+                print(f"skipped live article: {article['url']}")
+                skipped_articles +=1
 
     print(retrieved_articles, skipped_articles)
 
