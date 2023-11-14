@@ -83,13 +83,19 @@ def scrape_article(article):
                 "This site is protected by reCAPTCHA" not in p.text):
             if p.get_text().startswith('"') and p.get_text().endswith('"'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
-                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ")
+                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n",
+                                                                                                                  " ").replace(
+                    '“', "'").replace('”', "'").replace("’", "'")
                 body.append({"type": "quote", "text": cleaned_text})
             elif p.name == 'h2':
-                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ")
+                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n",
+                                                                                                                  " ").replace(
+                    '“', "'").replace('”', "'").replace("’", "'")
                 body.append({"type": "headline", "text": cleaned_text})
             else:
-                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ")
+                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0',
+                                                                                                            ' ').replace(
+                    'NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'")
                 body.append({"type": "text", "text": cleaned_text})
     # scrape category
     category = article['primaryCategory'][0]['term']
