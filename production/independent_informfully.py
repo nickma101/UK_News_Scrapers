@@ -59,7 +59,7 @@ def scrape_article(article):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # scrape article body
-    divs = soup.find('div', {'class': 'sc-1fcmxs3-1 sc-1i4xxi7-1 hWGOwK dnhtQj'})
+    divs = soup.find('div', {'class': 'sc-jbiisr-0 cUUSOX sc-jbiisr-2 ifLoCP'})
     all_paragraphs = []
 
     for div in divs:

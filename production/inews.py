@@ -3,6 +3,7 @@ import requests, json, re, os
 from utils.utils import create_article
 from datetime import datetime, timedelta
 from unidecode import unidecode
+from bson import json_util
 
 
 NEWS_OUTLET = "INews"
@@ -80,13 +81,13 @@ def scrape_article(url):
         for p in paragraphs:
             element_name = p.name
             if element_name == 'h1' or element_name == 'h2':
-                text = p.get_text()
+                text = p.get_text().replace('\u00A0', ' ')
                 #if text != "Related Article":
                 body.append({"type": "headline", "text": text})
             else:
-                text = p.get_text()
+                text = p.get_text().replace('\u00A0', ' ').replace('“', "'").replace('”', "'").replace('“', "'")
                 # if text.startswith('"') and text.endswith('"'):
-                if text.startswith('“') and text.endswith('”'):
+                if text.startswith("'") and text.endswith("'"):
                     # If the text starts and ends with double quotation marks, treat it as a quote
                     body.append({"type": "quote", "text": text})
                 else:
@@ -130,7 +131,7 @@ def scrape_article(url):
 
 def scrape_articles():
 
-    articles = []
+    newsarticles_collection = []
     retrieved_articles = 0
     skipped_articles = 0
 
@@ -141,7 +142,7 @@ def scrape_articles():
             article = scrape_article(url)
             # check if article is eligible for recommendation
             if len(article['body']) >= 7 and article['title'] != "None" and article["image"] != "None":
-                articles.append(article)
+                newsarticles_collection.append(article)
                 retrieved_articles += 1
             else:
                 skipped_articles += 1
@@ -154,9 +155,9 @@ def scrape_articles():
     full_path = os.path.join(desired_dir, filename)
 
     with open(full_path, "w") as file:
-        json.dump(articles, file, default=str, ensure_ascii=False)
+        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
 
-    return articles
+    return newsarticles_collection
 
 
 scrape_articles()
