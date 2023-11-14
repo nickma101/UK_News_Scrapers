@@ -61,12 +61,12 @@ def scrape():
                 filtered_paragraphs = [p for p in all_paragraphs if not p.has_attr('class')]
                 body = []
                 for p in filtered_paragraphs:
-                    if "Read more:" not in p.text and "Related" not in p.text:
+                    if "Read more:" not in p.text and "Related:" not in p.text:
                         if p.find('strong'):
-                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”', "'")
+                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
                             body.append({"type": "headline", "text": text})
                         else:
-                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”', "'")
+                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
                             if text.startswith("'") and text.endswith("'"):
                                 body.append({"type": "quote", "text": text})
                             else:
