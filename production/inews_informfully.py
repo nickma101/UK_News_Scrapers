@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import requests, json, re, os
 from utils.utils import create_article
 from datetime import datetime, timedelta
+from unidecode import unidecode
+from bson import json_util
+
 
 NEWS_OUTLET = "INews"
 NEWS_LANGUAGE = "en-UK"
@@ -71,23 +74,27 @@ def scrape_article(url):
         image_src = "None"
 
     # scrape article body
-    content = soup.find('div', {'class': 'article-content'})
     try:
-        paragraphs = content.find_all(['p', 'h1', 'h2'])
+        content = soup.find('div', {'class': 'article-content'})
+        # content = filter(lambda element: len(element.attrs) <= 1, soup.find('div', {'class': 'article-content'}))
+        paragraphs = content.find_all(['p', 'h1'])
         body = []
         for p in paragraphs:
-            element_name = p.name
-            if element_name == 'h1' or element_name == 'h2':
-                text = p.get_text()
-                body.append({"type": "headline", "text": text})
-            else:
-                text = p.get_text()
-                if text.startswith('“') and text.endswith('”'):
-                    # If the text starts and ends with double quotation marks, treat it as a quote
-                    body.append({"type": "quote", "text": text})
+            if "Let us know:" not in p.get_text():
+                element_name = p.name
+                if element_name == 'h1':
+                    text = p.get_text().replace('\u00A0', ' ').replace("’", "'")
+                    #if text != "Related Article":
+                    body.append({"type": "headline", "text": text})
                 else:
-                    text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ')
-                    body.append({"type": "text", "text": text})
+                    text = p.get_text().replace('\u00A0', ' ').replace('“', "'").replace('”', "'").replace('“', "'").replace("’", "'")
+                    # if text.startswith('"') and text.endswith('"'):
+                    if text.startswith("'") and text.endswith("'"):
+                        # If the text starts and ends with double quotation marks, treat it as a quote
+                        body.append({"type": "quote", "text": text})
+                    else:
+                        text = text.replace('INews', 'Informfully').replace(' i ', ' Informfully ').replace("’", "'")
+                        body.append({"type": "text", "text": text})
     except:
         print("Something fishy here", url)
         body = []
