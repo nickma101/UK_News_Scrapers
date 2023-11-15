@@ -1,5 +1,6 @@
 from bson.objectid import ObjectId
 from datetime import datetime
+import re
 
 def generate_id():
     return str(ObjectId())
@@ -22,16 +23,21 @@ def create_article(
     return {
         "_id": generate_id(), # Generate custom ID because the backend uses strings instead of ObjectId()s
         "url": url,
+        "articleType": "text",
         "primaryCategory": primary_category,
         "subCategories": sub_categories,
         "title": title,
         "lead": lead,
         "author": author,
-        "datePublished": date_published,
+        "datePublished": datetime.now(),
         "dateScraped": datetime.now(),
-        "dateUpdated": date_updated,
+        "dateUpdated": datetime.now(),
         "language": language,
         "outlet": outlet,
         "image": image,
         "body": body,
     }
+
+def cleanText(text):
+    # TODO Replace exotic quotation marks...
+    return re.sub('[^a-zA-Z0-9 \n\.\£\$\!\?\'\:\;\%\€]', '', text)
