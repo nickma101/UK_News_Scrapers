@@ -89,6 +89,8 @@ def scrape_article(article):
     # rename categories
     if category == 'Crime':
         category = 'crime'
+    if category == 'Culture' or category == 'Film':
+        category = 'entertainment&arts'
     if category == 'Football':
         category = 'football'
     if category == 'Health &amp; Families':
@@ -97,9 +99,9 @@ def scrape_article(article):
         category = 'lifeandstyle'
     if category == 'UK Politics':
         category = 'politics'
-    if category == 'Sport' or category == 'Cricket' or category == 'Golf':
+    if category == 'Sport' or category == 'Cricket' or category == 'Golf' or category == 'Tennis':
         category = 'sport'
-    if category == 'UK':
+    if category == 'UK' or category == 'Home News':
         category = 'uk news'
 
     document = create_article(

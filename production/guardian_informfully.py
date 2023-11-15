@@ -46,7 +46,7 @@ def scrape():
                 # reorganise categories
                 if category == 'fashion':
                     category = 'lifeandstyle'
-                if category == 'artanddesign' or category == 'film' or category == 'music':
+                if category == 'artanddesign' or category == 'film' or category == 'music' or category == 'culture':
                     category = 'entertainment&arts'
                 # scrape author
                 if 'byline' in article['fields']:

@@ -118,7 +118,7 @@ def scrape_article(article):
         category = 'money'
     if category == 'Politics':
         category = 'politics'
-    if category == 'Boxing' or category == 'Golf' or category == 'F1':
+    if category == 'Boxing' or category == 'Golf' or category == 'F1' or category == 'Tennis':
         category = 'sport'
     if category == 'Science':
         category = 'science'
