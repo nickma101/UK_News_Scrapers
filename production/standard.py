@@ -66,14 +66,8 @@ def scrape_article(article):
         # Find and add all 'p' and 'h2' tags within the modified 'divs' element
         block = divs.find_all(['p', 'h2'])
         paragraphs.extend(block)
-    # for div in divs:
-    #     if div.find('div', {'class': 'sc-kxZkPw kMnNar'}):
-    #     block = div.find_all(['p', 'h2'])
-    #    paragraphs.extend(block)
     body = []
-    #first_paragraph = paragraphs[0]
-    #body.append({"type": "text", "text": str(first_letter) + str(first_paragraph.text)})
-    #other_paragraphs = paragraphs[1:]
+
     for p in paragraphs:
         if ("Read more:" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
@@ -83,13 +77,13 @@ def scrape_article(article):
                 "This site is protected by reCAPTCHA" not in p.text):
             if p.get_text().startswith('"') and p.get_text().endswith('"'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
-                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'")
+                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "quote", "text": cleaned_text})
             elif p.name == 'h2':
-                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'")
+                cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "headline", "text": cleaned_text})
             else:
-                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'")
+                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "text", "text": cleaned_text})
     # scrape category
     category = article['primaryCategory'][0]['term']
@@ -152,7 +146,7 @@ def scrape():
             try:
                 new_article = scrape_article(article)
                 # check if article is eligible for recommendation
-                if new_article and len(new_article['body']) >= 7:
+                if new_article and len(new_article['body']) >= 7 and "Rugby Podcast" not in new_article['title']:
                     newsarticles_collection.append(new_article)
                     retrieved_articles += 1
             except Exception as e:
