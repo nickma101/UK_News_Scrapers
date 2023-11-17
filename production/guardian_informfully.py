@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from bson import json_util
 import re
 
-api_key = "f94c47f1-7f90-4c7a-af87-bdda7ed60fb8"
+api_key = "placeholder"
 base_url = "https://content.guardianapis.com/search"
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
