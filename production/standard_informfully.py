@@ -53,7 +53,6 @@ def get_rss_feed(feed):
 # Scrape individual articles and combine existing RSS meta-data with text from website
 def scrape_article(article):
     response = requests.get(article['url'])
-    print(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
     # scrape article text
     divs = soup.find('div', {'class': 'sc-enDNfw iLaNIc'})
@@ -84,7 +83,6 @@ def scrape_article(article):
                 body.append({"type": "quote", "text": cleaned_text})
             elif p.name == 'h2':
                 cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
-                print(cleaned_text)
                 body.append({"type": "headline", "text": cleaned_text})
             else:
                 cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully').replace('Standard Sport', 'Informfully')
