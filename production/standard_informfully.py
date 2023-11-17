@@ -70,13 +70,13 @@ def scrape_article(article):
     body = []
 
     for p in paragraphs:
-        if ("Read more:" not in p.text and
+        if ("Read more:" not in p.text and "Read more here" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
                 "MORE ABOUT" not in p.text and "Additional report by PA Sport" not in p.text and
                 "Have your say..." not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
-            if p.get_text().startswith('"') and p.get_text().endswith('"'):
+            if p.get_text().startswith('"') and p.get_text().endswith('"') or p.get_text().startswith("“") and p.get_text().endswith('”'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
                 cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "quote", "text": cleaned_text})
@@ -159,3 +159,5 @@ def scrape():
     print(retrieved_articles, skipped_articles)
 
     return newsarticles_collection
+
+scrape()
