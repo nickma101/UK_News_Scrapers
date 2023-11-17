@@ -119,14 +119,4 @@ def scrape():
 
     print(retrieved_articles, skipped_articles)
 
-#    dateString = str(date)[:10]
-#    filename = "sky_articles" + dateString + ".json"
-#    desired_dir = "data"
-#    full_path = os.path.join(desired_dir, filename)
-
-#    with open(full_path, "w") as file:
-#        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
-
     return newsarticles_collection
-
-# scrape()

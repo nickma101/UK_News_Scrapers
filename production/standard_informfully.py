@@ -73,7 +73,7 @@ def scrape_article(article):
         if ("Read more:" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
-                "MORE ABOUT" not in p.text and
+                "MORE ABOUT" not in p.text and "Additional report by PA Sport" not in p.text and
                 "Have your say..." not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
             if p.get_text().startswith('"') and p.get_text().endswith('"'):
@@ -120,18 +120,18 @@ def scrape_article(article):
         category = 'world'
     # create article
     document = create_article(
-        url=article['url'],                                         # string
-        primary_category=category,     # string
-        sub_categories="None",                                      # string
-        title=article['title'],                                     # string
-        lead=remove_html_tags(article['lead']),                     # string
-        author=article['author'],                                   # string
-        date_published=article['date_published'],                   # datetime
-        date_updated=article['date_updated'],                       # datetime
-        language=NEWS_LANGUAGE,                                     # string
-        outlet=NEWS_OUTLET,                                         # string
-        image=article['image'][0]['url'],                           # string
-        body=body                                                   # list of dictionaries
+        url=article['url'],  # string
+        primary_category=category,  # string
+        sub_categories="None",  # string
+        title=article['title'].replace('the Evening Standard', 'Informfully'),  # string
+        lead=remove_html_tags(article['lead']),  # string
+        author=article['author'],  # string
+        date_published=article['date_published'],  # datetime
+        date_updated=article['date_updated'],  # datetime
+        language=NEWS_LANGUAGE,  # string
+        outlet=NEWS_OUTLET,  # string
+        image=article['image'][0]['url'],  # string
+        body=body  # list of dictionaries
     )
     return document
 
@@ -158,16 +158,4 @@ def scrape():
 
     print(retrieved_articles, skipped_articles)
 
-
-#    dateString = str(date)[:10]
-#    filename = "standard_articles" + dateString + ".json"
-#    desired_dir = "data"
-#    full_path = os.path.join(desired_dir, filename)
-
-#    with open(full_path, "w") as file:
-#        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
-
-return newsarticles_collection
-
-
-#scrape()
+    return newsarticles_collection

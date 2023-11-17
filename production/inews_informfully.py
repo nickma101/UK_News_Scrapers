@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 import requests, json, re, os
 from utils.utils import create_article
 from datetime import datetime, timedelta
-from unidecode import unidecode
 from bson import json_util
 
 
@@ -130,7 +129,7 @@ def scrape_article(url):
     )
     return document
 
-def scrape_articles():
+def scrape():
 
     articles = []
     retrieved_articles = 0
@@ -150,15 +149,4 @@ def scrape_articles():
 
     print(retrieved_articles, skipped_articles)
 
-#    dateString = str(date)[:10]
-#    filename = "inews_articles" + dateString + ".json"
-#    desired_dir = "data"
-#    full_path = os.path.join(desired_dir, filename)
-
-#    with open(full_path, "w") as file:
-#        json.dump(articles, file, default=str, ensure_ascii=False)
-
     return articles
-
-
-# scrape_articles()
