@@ -343,8 +343,8 @@ def main():
     WEEK1_GROUP4.append("bMyY9MiyvyYuDLovJ")   # User: i5w7k, Pass: igX5Q
 
     # Step 1: Run scraper
-    news_collection = run_scrapers()
-    write_articles(news_collection)
+    # news_collection = run_scrapers()
+    # write_articles(news_collection)
     news_collection = read_articles()
 
     # Step 2: Run recommender

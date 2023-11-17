@@ -53,6 +53,7 @@ def get_rss_feed(feed):
 # Scrape individual articles and combine existing RSS meta-data with text from website
 def scrape_article(article):
     response = requests.get(article['url'])
+    print(article['url'])
     soup = BeautifulSoup(response.content, 'html.parser')
     # scrape article text
     divs = soup.find('div', {'class': 'sc-enDNfw iLaNIc'})
@@ -60,12 +61,13 @@ def scrape_article(article):
     # first_letter = divs.find('span').text
     if divs:
         # Find all 'div' elements with class 'sc-kxZkPw kMnNar' and remove them
-        for unwanted_div in divs.find_all('div', {'class': 'sc-kxZkPw kMnNar'}):
-            unwanted_div.extract()
+        #for unwanted_div in divs.find_all('div', {'class': 'sc-kxZkPw kMnNar'}):
+        #    unwanted_div.extract()
 
         # Find and add all 'p' and 'h2' tags within the modified 'divs' element
         block = divs.find_all(['p', 'h2'])
         paragraphs.extend(block)
+        #print(block)
 
     body = []
 
@@ -82,9 +84,10 @@ def scrape_article(article):
                 body.append({"type": "quote", "text": cleaned_text})
             elif p.name == 'h2':
                 cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
+                print(cleaned_text)
                 body.append({"type": "headline", "text": cleaned_text})
             else:
-                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
+                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully').replace('Standard Sport', 'Informfully')
                 body.append({"type": "text", "text": cleaned_text})
     # scrape category
     # scrape category

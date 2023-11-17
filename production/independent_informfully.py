@@ -71,7 +71,7 @@ def scrape_article(article):
 
     for p in filtered_paragraphs:
         if ("Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and
-                "Read more from" not in p.text and
+                "Read more from" not in p.text and "Getty Images" not in p.text and
                 "Join thought-provoking conversations, follow other" not in p.text):
             if p.find('strong'):
                 text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
