@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from bson import json_util
 import re
 
-api_key = "4ed35a9f-ee74-47db-8cc6-0aac0a181417"
+api_key = "placeholder"
 base_url = "https://content.guardianapis.com/search"
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
@@ -17,7 +17,7 @@ query_params = {
     "show-tags": "all",
     "from-date": yesterday.date().isoformat(),
     "to-date": date.date().isoformat(),
-    "page-size": 100,                               # max allowed by the API
+    "page-size": 200,                               # max allowed by the API
 }
 
 NEWS_LANGUAGE = 'en-UK'

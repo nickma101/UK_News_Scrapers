@@ -72,6 +72,7 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if ("Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and
                 "Read more from" not in p.text and "Getty Images" not in p.text and
+                "Photolure via REUTERS" not in p.text and
                 "Join thought-provoking conversations, follow other" not in p.text):
             if p.find('strong'):
                 text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
@@ -151,6 +152,6 @@ def scrape():
                 print(f"skipped live article: {article['url']}")
                 skipped_articles +=1
 
-    print(retrieved_articles, skipped_articles)
+    print(retrieved_articles, skipped_articles)git a
 
     return newsarticles_collection
