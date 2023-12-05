@@ -1,12 +1,11 @@
-#!/usr/bin/python
-from credentials.creds import Guardian_api_key
 import requests, json, os
 from datetime import datetime, timedelta
 from utils.utils import create_article
 from bs4 import BeautifulSoup
 from bson import json_util
+import re
 
-api_key = Guardian_api_key
+api_key = "4ed35a9f-ee74-47db-8cc6-0aac0a181417"
 base_url = "https://content.guardianapis.com/search"
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
@@ -104,17 +103,5 @@ def scrape():
             print(article['webUrl'])
 
     print(retrieved_articles, skipped_articles)
-
-    dateString = str(date)[:10]
-    filename = "guardian_articles" + dateString + ".json"
-    desired_dir = "data"
-    full_path = os.path.join(desired_dir, filename)
-
-    with open(full_path, "w") as file:
-        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
-
+    
     return newsarticles_collection
-
-scrape()
-
-

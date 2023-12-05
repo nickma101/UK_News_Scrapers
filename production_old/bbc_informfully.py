@@ -53,6 +53,8 @@ def should_filter(p):
         "This video can not be played",
         "BBC is not responsible",
         "ssrcss-17zglt8-PromoHeadline",
+        "Allow Twitter content?",
+        "This article contains content provided by Twitter.",
         "Sign up for our morning newsletter",
         "Listen to Newsbeat live at",
         "Follow BBC ",
@@ -83,7 +85,7 @@ def scrape_article(article):
                 body.append({"type": "quote", "text": cleaned_text})
             # TODO: find headlines
             else:
-                cleaned_text = p.get_text().replace('the BBC', 'Informfully').replace('BBC', 'Informfully').replace('"', "'") #.replace('"', "'").replace('\u00a0', '').replace('\u00b0', '°').replace('\u2026','...').replace('\u2026','...').replace('\u00e1', 'á').replace('\u00c9', 'É')
+                cleaned_text = p.get_text().replace('The BBC', 'Informfully').replace('the BBC', 'Informfully').replace('BBC', 'Informfully').replace('"', "'") #.replace('"', "'").replace('\u00a0', '').replace('\u00b0', '°').replace('\u2026','...').replace('\u2026','...').replace('\u00e1', 'á').replace('\u00c9', 'É')
                 body.append({"type": "text", "text": cleaned_text})
 
     # Categories (scrape all categories of an article)
@@ -169,14 +171,4 @@ def scrape():
 
     print(retrieved_articles, skipped_articles)
 
-    # dateString = str(date)[:10]
-    # filename = "bbc_articles" + dateString + ".json"
-    # desired_dir = "data"
-    # full_path = os.path.join(desired_dir, filename)
-
-    #with open(full_path, "w") as file:
-    #    json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
-
     return newsarticles_collection
-
-# scrape()

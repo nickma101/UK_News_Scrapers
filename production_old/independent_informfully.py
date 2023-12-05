@@ -59,7 +59,7 @@ def scrape_article(article):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # scrape article body
-    divs = soup.find('div', {'class': 'sc-fwko30-0 iNpegk main-wrapper'})
+    divs = soup.find('div', {'class': 'sc-fwko30-0 kGegkB main-wrapper'})
     all_paragraphs = []
 
     for div in divs:
@@ -70,7 +70,10 @@ def scrape_article(article):
     body = []
 
     for p in filtered_paragraphs:
-        if "Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and "Read more from" not in p.text:
+        if ("Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and
+                "Read more from" not in p.text and "Getty Images" not in p.text and
+                "Photolure via REUTERS" not in p.text and
+                "Join thought-provoking conversations, follow other" not in p.text):
             if p.find('strong'):
                 text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
                 body.append({"type": "headline", "text": text})
@@ -149,17 +152,6 @@ def scrape():
                 print(f"skipped live article: {article['url']}")
                 skipped_articles +=1
 
-    print(retrieved_articles, skipped_articles)
-
-#    dateString = str(date)[:10]
-#    filename = "independent_articles" + dateString + ".json"
-#    desired_dir = "data"
-#    full_path = os.path.join(desired_dir, filename)
-
-#    with open(full_path, "w") as file:
-#        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
+    print(retrieved_articles, skipped_articles)git a
 
     return newsarticles_collection
-
-
-# scrape()

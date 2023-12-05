@@ -3,6 +3,7 @@ import feedparser, requests, json, os, re
 from utils.utils import create_article
 from datetime import datetime
 from bson import json_util
+import utils.utils as utility
 
 # Define the default name and feed of the news outlet
 
@@ -53,8 +54,6 @@ def should_filter(p):
         "This video can not be played",
         "BBC is not responsible",
         "ssrcss-17zglt8-PromoHeadline",
-        "Allow Twitter content?",
-        "This article contains content provided by Twitter.",
         "Sign up for our morning newsletter",
         "Listen to Newsbeat live at",
         "Follow BBC ",
@@ -81,11 +80,11 @@ def scrape_article(article):
             text = p.get_text()
             if text.startswith('"') and text.endswith('"'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
-                cleaned_text = text.replace('"', "'")
+                cleaned_text = utility.clean_text(text)
                 body.append({"type": "quote", "text": cleaned_text})
             # TODO: find headlines
             else:
-                cleaned_text = p.get_text().replace('The BBC', 'Informfully').replace('the BBC', 'Informfully').replace('BBC', 'Informfully').replace('"', "'") #.replace('"', "'").replace('\u00a0', '').replace('\u00b0', '°').replace('\u2026','...').replace('\u2026','...').replace('\u00e1', 'á').replace('\u00c9', 'É')
+                cleaned_text = utility.clean_text(text)
                 body.append({"type": "text", "text": cleaned_text})
 
     # Categories (scrape all categories of an article)
@@ -135,8 +134,8 @@ def scrape_article(article):
     document = create_article(
         url=article['url'],                         # string
         primary_category=primary_category,          # string
-        title=article['title'],                     # string
-        lead=article['lead'],                       # string
+        title=utility.clean_text(article['title']),                     # string
+        lead=utility.clean_text(article['lead']),                       # string
         author=author,                              # string
         date_published=article['date_published'],   # datetime
         date_updated=article['date_published'],     # datetime - NEEDS WORK (currently same as date published)

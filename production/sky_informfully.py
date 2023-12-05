@@ -4,6 +4,7 @@ from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
 from bson import json_util
+import utils.utils as utility
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "SkyNews"
@@ -60,10 +61,10 @@ def scrape_article(article, category):
     for p in filtered_paragraphs:
         if "Read more" not in p.text:
             if p.find('strong'):
-                text = str(p.text).replace('Sky News', 'Informfully').replace('"', "'")
+                text = utility.clean_text(p.text)
                 body.append({"type": "headline", "text": text})
             else:
-                text = str(p.text).replace('Sky News', 'Informfully').replace('"', "'")
+                text = utility.clean_text(p.text)
                 body.append({"type": "text", "text": text})
 
     # scrape date
@@ -76,13 +77,15 @@ def scrape_article(article, category):
     else:
         author = DEFAULT_AUTHOR
 
+    title = article['title'].replace('and #163;', 'GBP').replace('and #8364;', '€')
+
     # create article
     document = create_article(
         url=article['url'],
         primary_category=category,          # string
         sub_categories=DEFAULT_CATEGORY,    # string
-        title=article['title'],             # string
-        lead=article['lead'],               # string
+        title=utility.clean_text(article['title']),             # string
+        lead=utility.clean_text(article['lead']),               # string
         author=author,                      # string
         date_published=published,           # datetime
         date_updated=published,             # datetime - NEEDS WORK

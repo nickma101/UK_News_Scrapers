@@ -4,6 +4,7 @@ from utils.utils import create_article
 from bs4 import BeautifulSoup
 from bson import json_util
 import re
+import utils.utils as utility
 
 api_key = "placeholder"
 base_url = "https://content.guardianapis.com/search"
@@ -62,14 +63,10 @@ def scrape():
                 for p in filtered_paragraphs:
                     if "Read more:" not in p.text and "Related:" not in p.text:
                         if p.find('strong'):
-                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”',
-                                                                                                                "'").replace(
-                                '‘', "'").replace('’', "'").replace("’", "'")
+                            text = utility.clean_text(p.text)
                             body.append({"type": "headline", "text": text})
                         else:
-                            text = str(p.text).replace('The Guardian', 'Informfully').replace('“', "'").replace('”',
-                                                                                                                "'").replace(
-                                '‘', "'").replace('’', "'").replace("’", "'")
+                            text = utility.clean_text(p.text)
                             if text.startswith("'") and text.endswith("'"):
                                 body.append({"type": "quote", "text": text})
                             else:
@@ -79,9 +76,9 @@ def scrape():
                             url=article['webUrl'],                  # string
                             primary_category=category,              # string
                             sub_categories="None",                  # string
-                            title=article['webTitle'],              # string
-                            lead=article['fields']['trailText'],    # string
-                            author=author,                          # string
+                            title=utility.clean_text(article['webTitle']),              # string
+                            lead=utility.clean_text(article['fields']['trailText']),    # string
+                            author="Guardian",                          # string
                             date_published=published,               # datetime
                             date_updated=published,                 # datetime NEEDS WORK
                             language=NEWS_LANGUAGE,                 # string

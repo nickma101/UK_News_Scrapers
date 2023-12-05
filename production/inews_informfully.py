@@ -3,6 +3,7 @@ import requests, json, re, os
 from utils.utils import create_article
 from datetime import datetime, timedelta
 from bson import json_util
+import utils.utils as utility
 
 
 NEWS_OUTLET = "INews"
@@ -11,7 +12,9 @@ NEWS_FEEDS = ["https://inews.co.uk/category/news/environment",
               "https://inews.co.uk/category/news/politics",
               "https://inews.co.uk/category/news/sport",
               "https://inews.co.uk/category/news/money",
-              "https://inews.co.uk/category/news/culture"]
+              "https://inews.co.uk/category/news/culture",
+              "https://inews.co.uk/category/news/health",  # added Nov 26th
+              "https://inews.co.uk/category/news/science"]  # added Nov 26th
 date = datetime.utcnow()
 yesterday = date - timedelta(days=1)
 
@@ -79,14 +82,14 @@ def scrape_article(url):
         paragraphs = content.find_all(['p', 'h1'])
         body = []
         for p in paragraphs:
-            if "Let us know:" not in p.get_text():
+            if "Let us know:" not in p.get_text() and 'pic.twitter.com' not in p.get_text():
                 element_name = p.name
                 if element_name == 'h1':
-                    text = p.get_text().replace('\u00A0', ' ').replace("’", "'")
+                    text = utility.clean_text(p.get_text())
                     #if text != "Related Article":
                     body.append({"type": "headline", "text": text})
                 else:
-                    text = p.get_text().replace('\u00A0', ' ').replace('“', "'").replace('”', "'").replace('“', "'").replace("’", "'")
+                    text = utility.clean_text(p.get_text())
                     # if text.startswith('"') and text.endswith('"'):
                     if text.startswith("'") and text.endswith("'"):
                         # If the text starts and ends with double quotation marks, treat it as a quote
@@ -117,8 +120,8 @@ def scrape_article(url):
         url=url,                                # string
         primary_category=category,              # string
         sub_categories="None",                  # string
-        title=title,                            # string
-        lead=lead,                              # string
+        title=utility.clean_text(title),                            # string
+        lead=utility.clean_text(lead),                              # string
         author=author,                          # string
         date_published=published,               # datetime
         date_updated=updated,                   # string            # NEEDS WORK BUT NECESSARY?

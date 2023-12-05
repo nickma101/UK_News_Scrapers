@@ -4,6 +4,7 @@ from utils.utils import create_article
 from datetime import datetime
 from dateutil import parser
 from bson import json_util
+import utils.utils as utility
 
 # Define the default name and feed of the news outlet
 NEWS_OUTLET = "Independent"
@@ -13,7 +14,8 @@ NEWS_FEEDS = ["https://www.independent.co.uk/news/uk/rss",
               "https://www.independent.co.uk/sport/rss",
               "https://www.independent.co.uk/arts-entertainment/rss",
               "https://www.independent.co.uk/travel/rss",
-              "https://www.independent.co.uk/life-style/rss"]
+              "https://www.independent.co.uk/life-style/rss",
+              "https://www.independent.co.uk/news/science/rss"]  # added Nov 26th
 NEWS_LANGUAGE = "en-UK"
 date = datetime.utcnow()
 
@@ -60,6 +62,12 @@ def scrape_article(article):
 
     # scrape article body
     divs = soup.find('div', {'class': 'sc-fwko30-0 kGegkB main-wrapper'})
+
+    if divs:
+        # Find all 'div' elements with class 'sc-kxZkPw kMnNar' and remove them
+        for unwanted_div in divs.find_all('div', {'class': 'sc-482ou5-4 DFDjW'}):
+            unwanted_div.extract()
+
     all_paragraphs = []
 
     for div in divs:
@@ -72,13 +80,12 @@ def scrape_article(article):
     for p in filtered_paragraphs:
         if ("Read more:" not in p.text and "PA" not in p.text and "Want to bookmark your" not in p.text and
                 "Read more from" not in p.text and "Getty Images" not in p.text and
-                "Photolure via REUTERS" not in p.text and
+                "Photolure via REUTERS" not in p.text and "GettyiStock" not in p.text and
                 "Join thought-provoking conversations, follow other" not in p.text):
+            text = utility.clean_text(p.get_text())
             if p.find('strong'):
-                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("’", "'")
                 body.append({"type": "headline", "text": text})
             else:
-                text = p.get_text().replace('"', "'").replace('The Independent', 'Informfully').replace('Independent', 'Informfully').replace('Independent', 'Informfully').replace('“', "'").replace('”', "'").replace('‘', "'").replace('’', "'").replace("\n", " ").replace("’", "'")
                 if text.startswith("'") and text.endswith("'"):
                     body.append({"type": "quote", "text": text})
                 else:
@@ -111,8 +118,8 @@ def scrape_article(article):
         url=article['url'],                                         # string
         primary_category=category,                                  # string
         sub_categories="None",                                      # string
-        title=article['title'].replace('‘', "'").replace('’', "'"), # string
-        lead=article['lead'].replace('‘', "'").replace('’', "'"),   # string
+        title=utility.clean_text(article['title']), # string
+        lead=utility.clean_text(article['lead']),   # string
         author=article['author'],                                   # string
         date_published=article['date_published'],                   # datetime
         date_updated=article['date_updated'],                       # datetime
@@ -152,6 +159,6 @@ def scrape():
                 print(f"skipped live article: {article['url']}")
                 skipped_articles +=1
 
-    print(retrieved_articles, skipped_articles)git a
+    print(retrieved_articles, skipped_articles)
 
     return newsarticles_collection

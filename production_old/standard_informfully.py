@@ -60,23 +60,24 @@ def scrape_article(article):
     # first_letter = divs.find('span').text
     if divs:
         # Find all 'div' elements with class 'sc-kxZkPw kMnNar' and remove them
-        for unwanted_div in divs.find_all('div', {'class': 'sc-kxZkPw kMnNar'}):
-            unwanted_div.extract()
+        #for unwanted_div in divs.find_all('div', {'class': 'sc-kxZkPw kMnNar'}):
+        #    unwanted_div.extract()
 
         # Find and add all 'p' and 'h2' tags within the modified 'divs' element
         block = divs.find_all(['p', 'h2'])
         paragraphs.extend(block)
+        #print(block)
 
     body = []
 
     for p in paragraphs:
-        if ("Read more:" not in p.text and
+        if ("Read more:" not in p.text and "Read more here" not in p.text and
                 "Sign up for exclusive newsletters" not in p.text and
                 "By clicking Sign up you confirm that" not in p.text and
-                "MORE ABOUT" not in p.text and
+                "MORE ABOUT" not in p.text and "Additional report by PA Sport" not in p.text and
                 "Have your say..." not in p.text and
                 "This site is protected by reCAPTCHA" not in p.text):
-            if p.get_text().startswith('"') and p.get_text().endswith('"'):
+            if p.get_text().startswith('"') and p.get_text().endswith('"') or p.get_text().startswith("“") and p.get_text().endswith('”'):
                 # If the text starts and ends with double quotation marks, treat it as a quote
                 cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "quote", "text": cleaned_text})
@@ -84,7 +85,7 @@ def scrape_article(article):
                 cleaned_text = p.get_text().replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
                 body.append({"type": "headline", "text": cleaned_text})
             else:
-                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully')
+                cleaned_text = str(p.text).replace('The Standard', 'Informfully').replace('"', "'").replace('\u00A0', ' ').replace('NBSP', ' ').replace("\n", " ").replace('“', "'").replace('”', "'").replace("’", "'").replace('the Evening Standard', 'Informfully').replace('Evening Standard', 'Informfully').replace('Standard Sport', 'Informfully')
                 body.append({"type": "text", "text": cleaned_text})
     # scrape category
     # scrape category
@@ -120,18 +121,18 @@ def scrape_article(article):
         category = 'world'
     # create article
     document = create_article(
-        url=article['url'],                                         # string
-        primary_category=category,     # string
-        sub_categories="None",                                      # string
-        title=article['title'],                                     # string
-        lead=remove_html_tags(article['lead']),                     # string
-        author=article['author'],                                   # string
-        date_published=article['date_published'],                   # datetime
-        date_updated=article['date_updated'],                       # datetime
-        language=NEWS_LANGUAGE,                                     # string
-        outlet=NEWS_OUTLET,                                         # string
-        image=article['image'][0]['url'],                           # string
-        body=body                                                   # list of dictionaries
+        url=article['url'],  # string
+        primary_category=category,  # string
+        sub_categories="None",  # string
+        title=article['title'].replace('the Evening Standard', 'Informfully'),  # string
+        lead=remove_html_tags(article['lead']),  # string
+        author=article['author'],  # string
+        date_published=article['date_published'],  # datetime
+        date_updated=article['date_updated'],  # datetime
+        language=NEWS_LANGUAGE,  # string
+        outlet=NEWS_OUTLET,  # string
+        image=article['image'][0]['url'],  # string
+        body=body  # list of dictionaries
     )
     return document
 
@@ -158,16 +159,6 @@ def scrape():
 
     print(retrieved_articles, skipped_articles)
 
+    return newsarticles_collection
 
-#    dateString = str(date)[:10]
-#    filename = "standard_articles" + dateString + ".json"
-#    desired_dir = "data"
-#    full_path = os.path.join(desired_dir, filename)
-
-#    with open(full_path, "w") as file:
-#        json.dump(newsarticles_collection, file, default=json_util.default, ensure_ascii=False)
-
-return newsarticles_collection
-
-
-#scrape()
+scrape()
